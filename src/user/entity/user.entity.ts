@@ -27,10 +27,10 @@ export class User {
   @Column()
   birthDate: Date;
 
-  @Column({ default: Role.GUEST_USER })
+  @Column({ type: 'enum', enum: Role, default: Role.GUEST_USER })
   role: Role;
 
-  @Column({ default: Plan.NO_PLAN })
+  @Column({ type: 'enum', enum: Plan, default: Plan.NO_PLAN })
   plan: Plan;
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })

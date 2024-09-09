@@ -12,7 +12,7 @@ import { MailModule } from 'src/mail/mail.module';
     JwtModule.register({
       global: true,
       secret: process.env.SECRET_KEY,
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '4w', issuer: 'http://localhost:3150' },
     }),
   ],
   controllers: [AuthController],

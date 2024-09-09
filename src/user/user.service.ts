@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -54,6 +55,24 @@ export class UserService {
     } catch (error) {
       throw new Error('Error verifying user');
     }
+  }
+
+  async findUserByEmailOrUsername(
+    email?: string,
+    username?: string,
+  ): Promise<User> {
+    if (!email && !username) {
+      throw new BadRequestException('Email or username required');
+    }
+    const user: User = await this.userRepository.findOne({
+      where: [{ email }, { username }],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   //   Crear metodo para cambiar la contraseña, eliminar usuario (soft delete).

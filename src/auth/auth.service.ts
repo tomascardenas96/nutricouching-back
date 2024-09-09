@@ -2,6 +2,8 @@ import {
   Injectable,
   BadGatewayException,
   BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -9,6 +11,7 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 import * as bcryptjs from 'bcryptjs';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -76,6 +79,7 @@ export class AuthService {
         throw new BadRequestException('Invalid token');
       }
 
+      // Cambiamos el valor de isEmailConfirmed a true
       await this.userService.verifyUser(user.email);
 
       return {
@@ -87,13 +91,48 @@ export class AuthService {
     }
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<any> {
     try {
-    } catch (error) {
-      throw new BadGatewayException(
-        'Error trying to login user',
-        error.message,
+      const user: User = await this.userService.findUserByEmailOrUsername(
+        loginDto.email,
+        loginDto.username,
       );
+
+      const isValidPassword: boolean = await bcryptjs.compare(
+        loginDto.password,
+        user.password,
+      );
+      if (!isValidPassword) {
+        throw new UnauthorizedException(
+          "Email / username and password doesn't match",
+        );
+      }
+
+      const SECRET_KEY = process.env.SECRET_KEY;
+      if (!SECRET_KEY) {
+        throw new UnauthorizedException('Secret key required');
+      }
+
+      const payload = {
+        sub: user.userId,
+        email: user.email,
+        role: user.role,
+      };
+
+      const token = await this.jwtService.signAsync(payload, {
+        secret: SECRET_KEY,
+      });
+
+      return { token };
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof UnauthorizedException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException('Error trying to login user');
     }
   }
 }
