@@ -1,5 +1,13 @@
-import { User } from 'src/user/entity/user.entity';
-import { Entity, PrimaryColumn, Column, ManyToMany } from 'typeorm';
+import { Booking } from 'src/booking/entities/booking.entity';
+import { Professional } from 'src/professional/entities/professional.entity';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  ManyToMany,
+  OneToMany,
+  JoinTable,
+} from 'typeorm';
 
 @Entity()
 export class Service {
@@ -15,6 +23,23 @@ export class Service {
   @Column({ nullable: false })
   price: number;
 
-  @ManyToMany(() => User, (user) => user.service)
-  user: User[];
+  @Column()
+  image: string;
+
+  @OneToMany(() => Booking, (booking) => booking.service)
+  booking: Booking;
+
+  @ManyToMany(() => Professional, (professional) => professional.service)
+  @JoinTable({
+    name: 'professional-by-service',
+    joinColumn: {
+      name: 'service',
+      referencedColumnName: 'serviceId',
+    },
+    inverseJoinColumn: {
+      name: 'professional',
+      referencedColumnName: 'professionalId',
+    },
+  })
+  professional: Professional[];
 }

@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
   NotFoundException,
+  BadGatewayException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,7 +16,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async createUser(user: CreateUserDto) {
+  async createUser(user: CreateUserDto): Promise<User> {
     // Verificamos si existe el email y nombre de usuario.
     const existentEmail = await this.userRepository.findOne({
       where: { email: user.email },
@@ -37,11 +38,22 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
-  findUserByEmail(email: string) {
+  async findUserByEmail(email: string): Promise<User> {
     try {
-      return this.userRepository.findOne({ where: { email } });
+      return await this.userRepository.findOne({
+        where: { email },
+        select: ['email', 'password', 'userId'],
+      });
     } catch (error) {
       throw new Error('Error getting user by email');
+    }
+  }
+
+  async findUserById(userId: string): Promise<User> {
+    try {
+      return await this.userRepository.findOne({ where: { userId } });
+    } catch (error) {
+      throw new Error('Error getting user by id');
     }
   }
 
@@ -55,24 +67,6 @@ export class UserService {
     } catch (error) {
       throw new Error('Error verifying user');
     }
-  }
-
-  async findUserByEmailOrUsername(
-    email?: string,
-    username?: string,
-  ): Promise<User> {
-    if (!email && !username) {
-      throw new BadRequestException('Email or username required');
-    }
-    const user: User = await this.userRepository.findOne({
-      where: [{ email }, { username }],
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    return user;
   }
 
   //   Crear metodo para cambiar la contraseña, eliminar usuario (soft delete).

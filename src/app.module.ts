@@ -10,6 +10,9 @@ import { ViandModule } from './viand/viand.module';
 import { CartModule } from './cart/cart.module';
 import { ServiceModule } from './service/service.module';
 import { MailModule } from './mail/mail.module';
+import { BookingModule } from './booking/booking.module';
+import { ProfessionalModule } from './professional/professional.module';
+import { AvailabilityModule } from './availability/availability.module';
 
 @Module({
   imports: [
@@ -30,6 +33,9 @@ import { MailModule } from './mail/mail.module';
     CartModule,
     ServiceModule,
     MailModule,
+    BookingModule,
+    ProfessionalModule,
+    AvailabilityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

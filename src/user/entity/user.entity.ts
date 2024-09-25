@@ -1,7 +1,16 @@
+import { Exclude } from 'class-transformer';
+import { Booking } from 'src/booking/entities/booking.entity';
 import { Plan } from 'src/common/enum/plan.enum';
 import { Role } from 'src/common/enum/role.enum';
 import { Service } from 'src/service/entity/service.entity';
-import { Entity, PrimaryColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -21,11 +30,8 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
-
-  @Column()
-  birthDate: Date;
 
   @Column({ type: 'enum', enum: Role, default: Role.GUEST_USER })
   role: Role;
@@ -48,17 +54,6 @@ export class User {
   @Column({ default: false })
   isEmailConfirmed: boolean;
 
-  @ManyToMany(() => Service, (service) => service.user)
-  @JoinTable({
-    name: 'user_services',
-    joinColumn: {
-      name: 'user',
-      referencedColumnName: 'userId',
-    },
-    inverseJoinColumn: {
-      name: 'service',
-      referencedColumnName: 'serviceId',
-    },
-  })
-  service: Service[];
+  @OneToMany(() => Booking, (booking) => booking.user)
+  booking: Booking;
 }

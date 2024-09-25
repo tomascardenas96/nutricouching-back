@@ -10,9 +10,6 @@ export class RegisterDto {
   @IsString()
   username: string;
 
-  @IsDateString()
-  birthDate: Date;
-
   @IsEmail()
   email: string;
 

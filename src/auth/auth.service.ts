@@ -91,12 +91,9 @@ export class AuthService {
     }
   }
 
-  async login(loginDto: LoginDto): Promise<any> {
+  async login(loginDto: LoginDto): Promise<{ token: string }> {
     try {
-      const user: User = await this.userService.findUserByEmailOrUsername(
-        loginDto.email,
-        loginDto.username,
-      );
+      const user: User = await this.userService.findUserByEmail(loginDto.email);
 
       const isValidPassword: boolean = await bcryptjs.compare(
         loginDto.password,
