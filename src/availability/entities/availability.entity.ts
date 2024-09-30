@@ -1,10 +1,17 @@
 import { Days } from 'src/common/enum/days.enum';
 import { Professional } from '../../professional/entities/professional.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Availability {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   availabilityId: string;
 
   @ManyToOne(() => Professional, (professional) => professional.availability)

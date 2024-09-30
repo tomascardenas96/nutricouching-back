@@ -1,13 +1,16 @@
-import { Injectable, BadGatewayException } from '@nestjs/common';
-import { CreateBookingDto } from './dto/create-booking.dto';
-import { UpdateBookingDto } from './dto/update-booking.dto';
-import { Booking } from './entities/booking.entity';
+import {
+  BadGatewayException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Professional } from 'src/professional/entities/professional.entity';
+import { ProfessionalService } from 'src/professional/professional.service';
 import { ServiceService } from 'src/service/service.service';
 import { UserService } from 'src/user/user.service';
-import { ProfessionalService } from 'src/professional/professional.service';
-import { Professional } from 'src/professional/entities/professional.entity';
+import { Repository } from 'typeorm';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { Booking } from './entities/booking.entity';
 
 @Injectable()
 export class BookingService {
@@ -23,14 +26,18 @@ export class BookingService {
     try {
       const booking: Booking = new Booking();
 
-      booking.bookingId = crypto.randomUUID();
-      booking.date = createBookingDto.date;
+      booking.date = new Date(createBookingDto.date + 'T00:00:00');
+
+      booking.time = createBookingDto.time;
+
       booking.service = await this.serviceService.findServiceById(
         createBookingDto.serviceId,
       );
+
       booking.user = await this.userService.findUserById(
         createBookingDto.userId,
       );
+
       booking.professional =
         await this.professionalService.findProfessionalById(
           createBookingDto.professionalId,
@@ -50,10 +57,17 @@ export class BookingService {
       const professional: Professional =
         await this.professionalService.findProfessionalById(professionalId);
 
-      return this.bookingRepository.find({
+      if (!professional) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      return await this.bookingRepository.find({
         where: { professional },
+        select: ['date', 'time'],
       });
     } catch (error) {
+      if (error instanceof NotFoundException) {
+      }
       throw new BadGatewayException('Error getting bookings by professional');
     }
   }
@@ -65,23 +79,8 @@ export class BookingService {
     const existingBooking = await this.bookingRepository.findOne({
       where: { date, professional },
     });
-    
+
     return !existingBooking; // Retorna verdadero si no hay reserva para el profesional en esa fecha/hora
   }
 
-  findAll() {
-    return `This action returns all booking`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} booking`;
-  }
-
-  update(id: number, updateBookingDto: UpdateBookingDto) {
-    return `This action updates a #${id} booking`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} booking`;
-  }
 }

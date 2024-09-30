@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Days } from 'src/common/enum/days.enum';
 
 export class CreateAvailabilityDto {
@@ -6,14 +6,16 @@ export class CreateAvailabilityDto {
   @IsString()
   professionalId: string;
 
-  @IsArray()
+  @IsEnum(Days)
   @IsNotEmpty()
-  days: Days[];
+  day: Days;
 
   @IsString()
   startTime: string;
 
   @IsString()
   endTime: string;
+
+  @IsNumber()
+  interval: number;
 }
- 

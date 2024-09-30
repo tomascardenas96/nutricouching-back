@@ -16,5 +16,6 @@ import { ProfessionalModule } from 'src/professional/professional.module';
   ],
   controllers: [BookingController],
   providers: [BookingService],
+  exports: [BookingService],
 })
 export class BookingModule {}

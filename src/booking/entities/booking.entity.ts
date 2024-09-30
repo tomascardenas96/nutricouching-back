@@ -6,30 +6,30 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity()
 export class Booking {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   bookingId: string;
 
-  @Column()
+  @Column({ type: 'date' })
   date: Date;
 
   @Column({ type: 'time' })
   time: string;
 
-  @ManyToOne(() => Service, (service) => service)
-  @JoinColumn({ name: 'service' })
+  @ManyToOne(() => Service, (service) => service.booking)
+  @JoinColumn({ name: 'serviceId' })
   service: Service;
 
   @ManyToOne(() => User, (user) => user.booking)
-  @JoinColumn({ name: 'user' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @ManyToOne(() => Professional, (professional) => professional.booking)
-  @JoinColumn({ name: 'professional' })
+  @JoinColumn({ name: 'professionalId' })
   professional: Professional;
 }

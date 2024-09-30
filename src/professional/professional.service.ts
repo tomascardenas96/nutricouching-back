@@ -1,4 +1,8 @@
-import { Injectable, BadGatewayException } from '@nestjs/common';
+import {
+  Injectable,
+  BadGatewayException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -59,10 +63,21 @@ export class ProfessionalService {
     return `This action removes a #${id} professional`;
   }
 
-  findProfessionalById(professionalId: string): Promise<Professional> {
+  async findProfessionalById(professionalId: string): Promise<Professional> {
     try {
-      return this.professionalRepository.findOne({ where: { professionalId } });
+      const professional = await this.professionalRepository.findOne({
+        where: { professionalId },
+      });
+
+      if (!professional) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      return professional;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new BadGatewayException('Error trying to find professional by id');
     }
   }
