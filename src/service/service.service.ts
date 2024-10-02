@@ -1,4 +1,8 @@
-import { Injectable, BadGatewayException } from '@nestjs/common';
+import {
+  Injectable,
+  BadGatewayException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Service } from './entity/service.entity';
 import { Repository } from 'typeorm';
@@ -31,10 +35,21 @@ export class ServiceService {
     }
   }
 
-  findServiceById(serviceId: string) {
+  async findServiceById(serviceId: string): Promise<Service> {
     try {
-      return this.serviceRepository.findOne({ where: { serviceId } });
+      const service: Service = await this.serviceRepository.findOne({
+        where: { serviceId },
+      });
+
+      if (!service) {
+        throw new NotFoundException('Service not found');
+      }
+
+      return service;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new BadGatewayException('Error trying to find service by ID');
     }
   }

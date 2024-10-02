@@ -96,9 +96,11 @@ export class AvailabilityService {
         order: { day: 'asc', startTime: 'asc' },
       });
 
+      const days = await this.getAvailableDaysByProfessional(professionalId);
+
       //Recorremos los horarios disponibles y verificamos si el dia en que el usuario solicita el turno el profesional trabaja, de ser negativo se retornara un arreglo vacio.
-      const isWorkingToday = availabilities.find((availability) => {
-        const subtractedAvailabilityDay = availability.day.substring(0, 3);
+      const isWorkingToday = days.find((day) => {
+        const subtractedAvailabilityDay = day.substring(0, 3);
 
         return subtractedDate === subtractedAvailabilityDay;
       });
@@ -119,9 +121,16 @@ export class AvailabilityService {
 
       const availableTimes = availabilities.filter((availability) => {
         const currentTime = availability.startTime + ':00';
+        const subtractedDayOfAvailabilityObject = availability.day.substring(
+          0,
+          3,
+        );
 
         // Verificar si ese horario ya fue reservado (compara con fecha y hora)
-        return !bookedSet.has(`${createDate}:${currentTime}`);
+        return (
+          !bookedSet.has(`${createDate}:${currentTime}`) &&
+          subtractedDayOfAvailabilityObject === subtractedDate
+        );
       });
 
       return availableTimes;
