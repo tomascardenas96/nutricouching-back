@@ -87,9 +87,15 @@ export class AvailabilityService {
       const professional: Professional =
         await this.professionalService.findProfessionalById(professionalId);
 
-      const createDate = new Date(date + 'T00:00:00').toDateString();
+      //Verificamos si la fecha seleccionada no es un dia pasado, en tal caso se devolvera un arreglo vacio.
+      const isAPreviousDay: boolean = this.verifyPreviousDay(date);
+      if (isAPreviousDay) {
+        return [];
+      }
+
+      const targetDateString = new Date(date + 'T00:00:00').toDateString();
       //Tomamos solo los primeros 3 caracteres para ver que dia de la semana es.
-      const subtractedDate = createDate.substring(0, 3);
+      const subtractedDate = targetDateString.substring(0, 3);
 
       const availabilities = await this.availabilityRepository.find({
         where: { professional },
@@ -128,7 +134,7 @@ export class AvailabilityService {
 
         // Verificar si ese horario ya fue reservado (compara con fecha y hora)
         return (
-          !bookedSet.has(`${createDate}:${currentTime}`) &&
+          !bookedSet.has(`${targetDateString}:${currentTime}`) &&
           subtractedDayOfAvailabilityObject === subtractedDate
         );
       });
@@ -145,6 +151,7 @@ export class AvailabilityService {
     }
   }
 
+  //Obtener los dias en que el profesional trabaja.
   private async getAvailableDaysByProfessional(
     professionalId: string,
   ): Promise<Days[]> {
@@ -165,5 +172,13 @@ export class AvailabilityService {
         'Error getting available days by professional',
       );
     }
+  }
+
+  //Verifica si el dia elegido es menor al dia actual, de ser positivo devolvera un arreglo vacio al frontend.
+  private verifyPreviousDay(date: Date): boolean {
+    const today = new Date(Date.now()).toISOString();
+    const targetISOString = new Date(date + 'T00:00:00').toISOString();
+
+    return targetISOString < today;
   }
 }

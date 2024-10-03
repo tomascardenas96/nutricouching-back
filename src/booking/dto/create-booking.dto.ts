@@ -1,20 +1,23 @@
-import { IsDateString, IsObject, IsString } from 'class-validator';
-import { Service } from '../../service/entity/service.entity';
-import { User } from '../../user/entity/user.entity';
+import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateBookingDto {
+  @IsNotEmpty()
   @IsDateString()
   date: Date;
 
+  @IsNotEmpty()
   @IsString()
   time: string;
 
+  @IsNotEmpty()
   @IsString()
   serviceId: string;
 
+  @IsNotEmpty()
   @IsString()
   userId: string;
 
+  @IsNotEmpty()
   @IsString()
   professionalId: string;
 }
