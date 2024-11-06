@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -24,6 +25,16 @@ export class BookingService {
 
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
     try {
+      //Verificamos primero si existe la reservacion.
+      const isBookingExistent: Booking[] = await this.bookingRepository.find({
+        where: { time: createBookingDto.time, date: createBookingDto.date },
+      });
+
+      if (isBookingExistent.length) {
+        throw new BadRequestException('Booking existent');
+      }
+
+      //Y luego la creamos.
       const booking: Booking = new Booking();
 
       booking.date = new Date(createBookingDto.date + 'T00:00:00');
@@ -45,7 +56,10 @@ export class BookingService {
 
       return this.bookingRepository.save(booking);
     } catch (error) {
-      if (error instanceof BadGatewayException) {
+      if (
+        error instanceof BadGatewayException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new BadGatewayException('Error creating booking');
@@ -82,5 +96,4 @@ export class BookingService {
 
     return !existingBooking; // Retorna verdadero si no hay reserva para el profesional en esa fecha/hora
   }
-
 }

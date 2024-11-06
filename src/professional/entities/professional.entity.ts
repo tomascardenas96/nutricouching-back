@@ -1,6 +1,7 @@
 import { Availability } from 'src/availability/entities/availability.entity';
 import { Booking } from 'src/booking/entities/booking.entity';
 import { Service } from 'src/service/entity/service.entity';
+import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
@@ -8,6 +9,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 
@@ -48,4 +50,7 @@ export class Professional {
 
   @OneToMany(() => Availability, (availability) => availability.professional)
   availability: Availability[];
+
+  @OneToOne(() => User, (user) => user.professionl)
+  user: User;
 }

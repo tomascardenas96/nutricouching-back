@@ -1,20 +1,20 @@
-import { Exclude } from 'class-transformer';
 import { Booking } from 'src/booking/entities/booking.entity';
 import { Plan } from 'src/common/enum/plan.enum';
 import { Role } from 'src/common/enum/role.enum';
-import { Service } from 'src/service/entity/service.entity';
+import { Professional } from 'src/professional/entities/professional.entity';
 import {
-  Entity,
-  PrimaryColumn,
   Column,
-  ManyToMany,
-  JoinTable,
+  Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('uuid')
   userId: string;
   // Generamos un randomUUID desde la logica.
 
@@ -56,4 +56,10 @@ export class User {
 
   @OneToMany(() => Booking, (booking) => booking.user)
   booking: Booking;
+
+  @OneToOne(() => Professional, (professional) => professional.user, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'professional' })
+  professionl: Professional;
 }

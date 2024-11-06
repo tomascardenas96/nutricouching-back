@@ -1,4 +1,5 @@
 import {
+  BadGatewayException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -7,6 +8,7 @@ import {
 import { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class TokenGuard implements CanActivate {
@@ -32,10 +34,13 @@ export class TokenGuard implements CanActivate {
         secret: process.env.SECRET_KEY,
       });
 
-      const user = await this.userService.findUserById(payload.sub);
+      const user: User = await this.userService.findUserById(payload.sub);
 
       request['user'] = user;
     } catch (error) {
+      if (error instanceof BadGatewayException) {
+        throw error;
+      }
       throw new UnauthorizedException();
     }
 

@@ -1,14 +1,12 @@
 import {
-  Injectable,
-  InternalServerErrorException,
-  BadRequestException,
-  NotFoundException,
   BadGatewayException,
+  BadRequestException,
+  Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entity/user.entity';
 
 @Injectable()
 export class UserService {
@@ -32,8 +30,7 @@ export class UserService {
       throw new BadRequestException('Username already exists');
     }
 
-    const randomId = crypto.randomUUID();
-    const newUser = this.userRepository.create({ userId: randomId, ...user });
+    const newUser = this.userRepository.create(user);
 
     return this.userRepository.save(newUser);
   }
@@ -51,9 +48,11 @@ export class UserService {
 
   async findUserById(userId: string): Promise<User> {
     try {
-      return await this.userRepository.findOne({ where: { userId } });
+      return await this.userRepository.findOne({
+        where: { userId },
+      });
     } catch (error) {
-      throw new Error('Error getting user by id');
+      throw new BadGatewayException('Error getting user by id');
     }
   }
 
