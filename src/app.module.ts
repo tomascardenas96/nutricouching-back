@@ -13,6 +13,9 @@ import { MailModule } from './mail/mail.module';
 import { BookingModule } from './booking/booking.module';
 import { ProfessionalModule } from './professional/professional.module';
 import { AvailabilityModule } from './availability/availability.module';
+import { ClientOrderModule } from './client-order/client-order.module';
+import { CartItemModule } from './cart-item/cart-item.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -36,6 +39,9 @@ import { AvailabilityModule } from './availability/availability.module';
     BookingModule,
     ProfessionalModule,
     AvailabilityModule,
+    ClientOrderModule,
+    CartItemModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

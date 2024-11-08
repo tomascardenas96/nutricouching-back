@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { ServiceController } from './service.controller';
-import { Service } from './entity/service.entity';
+import { Service } from './entities/service.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({

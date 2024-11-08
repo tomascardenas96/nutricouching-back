@@ -1,6 +1,6 @@
 import { Availability } from 'src/availability/entities/availability.entity';
 import { Booking } from 'src/booking/entities/booking.entity';
-import { Service } from 'src/service/entity/service.entity';
+import { Service } from 'src/service/entities/service.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,

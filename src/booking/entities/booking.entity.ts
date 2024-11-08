@@ -1,5 +1,5 @@
 import { Professional } from 'src/professional/entities/professional.entity';
-import { Service } from 'src/service/entity/service.entity';
+import { Service } from 'src/service/entities/service.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,

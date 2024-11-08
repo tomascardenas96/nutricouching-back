@@ -2,11 +2,11 @@ import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Product {
+export class Viand {
   @PrimaryGeneratedColumn('uuid')
-  productId: string;
+  viandId: string;
 
-  @OneToMany(() => CartItem, (cartItem) => cartItem.product)
+  @OneToMany(() => CartItem, (cartItem) => cartItem.viand)
   cartItem: CartItem[];
 
   @Column()

@@ -1,4 +1,5 @@
 import { Booking } from 'src/booking/entities/booking.entity';
+import { Cart } from 'src/cart/entities/cart.entity';
 import { Plan } from 'src/common/enum/plan.enum';
 import { Role } from 'src/common/enum/role.enum';
 import { Professional } from 'src/professional/entities/professional.entity';
@@ -16,7 +17,6 @@ import {
 export class User {
   @PrimaryGeneratedColumn('uuid')
   userId: string;
-  // Generamos un randomUUID desde la logica.
 
   @Column()
   name: string;
@@ -62,4 +62,8 @@ export class User {
   })
   @JoinColumn({ name: 'professional' })
   professionl: Professional;
+
+  @OneToOne(() => Cart, (cart) => cart.user)
+  @JoinColumn({ name: 'cart' })
+  cart: Cart;
 }
