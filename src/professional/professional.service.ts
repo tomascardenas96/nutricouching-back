@@ -10,7 +10,7 @@ import { Professional } from './entities/professional.entity';
 import { Repository } from 'typeorm';
 import { ServiceService } from 'src/service/service.service';
 import { AssignServiceDto } from './dto/assign-service.dto';
-import { Service } from 'src/service/entity/service.entity';
+import { Service } from 'src/service/entities/service.entity';
 
 @Injectable()
 export class ProfessionalService {

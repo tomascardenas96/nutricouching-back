@@ -1,4 +1,5 @@
 import { Booking } from 'src/booking/entities/booking.entity';
+import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
 import {
   Entity,
@@ -26,6 +27,9 @@ export class Service {
   @Column()
   image: string;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @OneToMany(() => Booking, (booking) => booking.service)
   booking: Booking;
 
@@ -42,4 +46,7 @@ export class Service {
     },
   })
   professional: Professional[];
+
+  @OneToMany(() => CartItem, (cartItem) => cartItem.service)
+  cartItem: CartItem[];
 }
