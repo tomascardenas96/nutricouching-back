@@ -1,12 +1,8 @@
-
-
-
 ## Nutricoaching Integral - Backend
 
 <div align="center">
     <img src="https://github.com/user-attachments/assets/0150c134-b66f-4226-9b80-877699a593a0" alt="Descripción" width="400" />
 </div>
-
 
 ### 1. Descripcion General del Proyecto
 
@@ -120,6 +116,7 @@ src/
     ├── booking.module.ts
     ├── booking.service.spec.ts
     ├── booking.service.ts
+├── ...
 ├── app.controller.spec.ts
 ├── app.controller.ts
 ├── app.module.ts
@@ -132,5 +129,3 @@ src/
 #### 5) Diagrama de Relacion de Entidades
 
 ![Captura de pantalla 2024-11-08 123313](https://github.com/user-attachments/assets/1ba6c9d4-461c-4aad-b3be-c235bf815611)
-
-

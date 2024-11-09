@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
 import { ILike } from 'typeorm';
@@ -54,6 +54,14 @@ export class ProductService {
       });
     } catch (error) {
       throw new BadGatewayException('Error getting product by name');
+    }
+  }
+
+  deleteProduct(productId: string): Promise<DeleteResult> {
+    try {
+      return this.productRepository.delete(productId);
+    } catch (error) {
+      throw new BadGatewayException('Error deleting product by id');
     }
   }
 }
