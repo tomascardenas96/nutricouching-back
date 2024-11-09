@@ -1,8 +1,13 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
+import { ILike } from 'typeorm';
 
 @Injectable()
 export class ProductService {
@@ -11,8 +16,26 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  async createNewProduct(product: CreateProductDto): Promise<Product> {
+    try {
+      // Validar que no exista ya el producto
+      const existentProduct: Product = await this.filterEntireProduct(product);
+
+      if (existentProduct) {
+        throw new BadRequestException('Product already exists');
+      }
+
+      const newProduct: Product = this.productRepository.create(product);
+      return this.productRepository.save(newProduct);
+    } catch (error) {
+      if (
+        error instanceof BadGatewayException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException('Error creating new product');
+    }
   }
 
   async getAllProducts(): Promise<Product[]> {
@@ -20,6 +43,17 @@ export class ProductService {
       return await this.productRepository.find();
     } catch (error) {
       throw new BadGatewayException('Error getting all products');
+    }
+  }
+
+  async filterEntireProduct(product: CreateProductDto) {
+    try {
+      const { name, price, stock, description, image } = product;
+      return this.productRepository.findOne({
+        where: { name, price, stock, description, image },
+      });
+    } catch (error) {
+      throw new BadGatewayException('Error getting product by name');
     }
   }
 }
