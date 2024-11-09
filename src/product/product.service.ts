@@ -8,6 +8,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './entities/product.entity';
 import { ILike } from 'typeorm';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -16,6 +17,7 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) {}
 
+  // Crear un nuevo producto
   async createNewProduct(product: CreateProductDto): Promise<Product> {
     try {
       // Validar que no exista ya el producto
@@ -38,6 +40,7 @@ export class ProductService {
     }
   }
 
+  // Listar todos los productos
   async getAllProducts(): Promise<Product[]> {
     try {
       return await this.productRepository.find();
@@ -46,7 +49,7 @@ export class ProductService {
     }
   }
 
-  async filterEntireProduct(product: CreateProductDto) {
+  private async filterEntireProduct(product: CreateProductDto) {
     try {
       const { name, price, stock, description, image } = product;
       return this.productRepository.findOne({
@@ -57,11 +60,21 @@ export class ProductService {
     }
   }
 
+  // Eliminar un producto
   deleteProduct(productId: string): Promise<DeleteResult> {
     try {
       return this.productRepository.delete(productId);
     } catch (error) {
       throw new BadGatewayException('Error deleting product by id');
+    }
+  }
+
+  // Modificar un producto
+  modifyProduct(productId: string, updatedProduct: UpdateProductDto) {
+    try {
+      return this.productRepository.update(productId, updatedProduct);
+    } catch (error) {
+      throw new BadGatewayException('Error modifying product by id');
     }
   }
 }
