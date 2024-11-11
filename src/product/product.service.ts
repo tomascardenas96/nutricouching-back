@@ -18,7 +18,10 @@ export class ProductService {
   ) {}
 
   // Crear un nuevo producto
-  async createNewProduct(product: CreateProductDto): Promise<Product> {
+  async createNewProduct(
+    product: CreateProductDto,
+    file: Express.Multer.File,
+  ): Promise<Product> {
     try {
       // Validar que no exista ya el producto
       const existentProduct: Product = await this.filterEntireProduct(product);
@@ -27,7 +30,17 @@ export class ProductService {
         throw new BadRequestException('Product already exists');
       }
 
-      const newProduct: Product = this.productRepository.create(product);
+      if (isNaN(product.stock) || isNaN(product.price)) {
+        throw new BadRequestException('Stock and price must be number');
+      }
+
+      const newProduct: Product = this.productRepository.create({
+        ...product,
+        stock: Number(product.stock),
+        price: Number(product.price),
+        image: file ? file.filename : null,
+      });
+
       return this.productRepository.save(newProduct);
     } catch (error) {
       if (
@@ -43,7 +56,11 @@ export class ProductService {
   // Listar todos los productos
   async getAllProducts(): Promise<Product[]> {
     try {
-      return await this.productRepository.find();
+      return await this.productRepository.find({
+        order: {
+          createdAt: 'DESC',
+        },
+      });
     } catch (error) {
       throw new BadGatewayException('Error getting all products');
     }
