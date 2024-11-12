@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Service } from './entities/service.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import ServiceDto from './dto/service.dto';
 
 @Injectable()
@@ -59,6 +59,16 @@ export class ServiceService {
       return this.serviceRepository.find();
     } catch (error) {
       throw new BadGatewayException('Error finding all services');
+    }
+  }
+
+  getServiceByName(title: string): Promise<Service[]> {
+    try {
+      return this.serviceRepository.find({
+        where: { title: ILike(`%${title}%`) },
+      });
+    } catch (error) {
+      throw new BadGatewayException('Error trying to find service by name');
     }
   }
 }
