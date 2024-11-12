@@ -73,7 +73,7 @@ export class ProductService {
         where: { name, price, stock, description, image },
       });
     } catch (error) {
-      throw new BadGatewayException('Error getting product by name');
+      throw new BadGatewayException('Error getting entire product');
     }
   }
 
@@ -87,9 +87,16 @@ export class ProductService {
   }
 
   // Modificar un producto
-  modifyProduct(productId: string, updatedProduct: UpdateProductDto) {
+  modifyProduct(
+    productId: string,
+    updatedProduct: UpdateProductDto,
+    file: Express.Multer.File,
+  ) {
     try {
-      return this.productRepository.update(productId, updatedProduct);
+      return this.productRepository.update(productId, {
+        ...updatedProduct,
+        image: file ? file.filename : undefined,
+      });
     } catch (error) {
       throw new BadGatewayException('Error modifying product by id');
     }

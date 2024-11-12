@@ -21,6 +21,9 @@ export class Viand {
   @Column()
   description: string;
 
+  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
   @Column({
     default:
       'https://www.syncros.com/_ui/responsive/common/images/no-product-image-available.png',
