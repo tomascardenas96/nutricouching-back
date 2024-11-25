@@ -21,7 +21,7 @@ import { UpdateViandDto } from './dto/update-viand.dto';
 export class ViandController {
   constructor(private readonly viandService: ViandService) {}
 
-  @Post()
+  @Post('create')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

@@ -1,14 +1,13 @@
 import {
   BadGatewayException,
-  Injectable,
   BadRequestException,
+  Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
-import { Product } from './entities/product.entity';
-import { ILike } from 'typeorm';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductService {
@@ -30,15 +29,19 @@ export class ProductService {
         throw new BadRequestException('Product already exists');
       }
 
-      if (isNaN(product.stock) || isNaN(product.price)) {
+      const parsedProduct = {
+        ...product,
+        stock: Number(product.stock),
+        price: Number(product.price),
+      };
+
+      if (isNaN(parsedProduct.stock) || isNaN(parsedProduct.price)) {
         throw new BadRequestException('Stock and price must be number');
       }
 
       const newProduct: Product = this.productRepository.create({
-        ...product,
-        stock: Number(product.stock),
-        price: Number(product.price),
-        image: file ? file.filename : null,
+        ...parsedProduct,
+        image: file ? file.filename : undefined,
       });
 
       return this.productRepository.save(newProduct);
@@ -70,7 +73,7 @@ export class ProductService {
     try {
       const { name, price, stock, description, image } = product;
       return this.productRepository.findOne({
-        where: { name, price, stock, description, image },
+        where: { name, description, image },
       });
     } catch (error) {
       throw new BadGatewayException('Error getting entire product');
@@ -87,16 +90,28 @@ export class ProductService {
   }
 
   // Modificar un producto
-  modifyProduct(
+  async modifyProduct(
     productId: string,
     updatedProduct: UpdateProductDto,
     file: Express.Multer.File,
   ) {
     try {
-      return this.productRepository.update(productId, {
-        ...updatedProduct,
-        image: file ? file.filename : undefined,
+      const existentProduct = await this.productRepository.findOne({
+        where: { productId },
       });
+
+      await this.productRepository.update(productId, {
+        ...updatedProduct,
+        price: Number(updatedProduct.price),
+        stock: Number(updatedProduct.stock),
+        image: file ? file.filename : existentProduct.image,
+      });
+
+      return {
+        ...existentProduct,
+        ...updatedProduct,
+        image: file ? file.filename : existentProduct.image,
+      };
     } catch (error) {
       throw new BadGatewayException('Error modifying product by id');
     }

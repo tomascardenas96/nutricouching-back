@@ -5,10 +5,10 @@ export class CreateViandDto {
   name: string;
 
   @IsNotEmpty()
-  price: number;
+  price: string;
 
   @IsNotEmpty()
-  stock: number;
+  stock: string;
 
   @IsString()
   description: string;

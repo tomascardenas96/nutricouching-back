@@ -27,7 +27,10 @@ export class ViandService {
         throw new BadRequestException('Viand already exists');
       }
 
-      if (isNaN(createViandDto.stock) || isNaN(createViandDto.price)) {
+      if (
+        isNaN(Number(createViandDto.stock)) ||
+        isNaN(Number(createViandDto.price))
+      ) {
         throw new BadRequestException('Stock and price must be number');
       }
 
@@ -48,9 +51,9 @@ export class ViandService {
 
   private filterEntireViand(viand: CreateViandDto): Promise<Viand> {
     try {
-      const { name, price, stock, description } = viand;
+      const { name, description } = viand;
       return this.viandRepository.findOne({
-        where: { name, price, stock, description },
+        where: { name, description },
       });
     } catch (error) {
       throw new BadGatewayException('Error getting entire viand');
@@ -83,10 +86,22 @@ export class ViandService {
     file: Express.Multer.File,
   ) {
     try {
-      return this.viandRepository.update(viandId, {
-        ...updatedViand,
-        image: file ? file.filename : undefined,
+      const existentViand = await this.viandRepository.findOne({
+        where: { viandId },
       });
+
+      await this.viandRepository.update(viandId, {
+        ...updatedViand,
+        price: Number(updatedViand.price),
+        stock: Number(updatedViand.stock),
+        image: file ? file.filename : existentViand.image,
+      });
+
+      return {
+        ...existentViand,
+        ...updatedViand,
+        image: file ? file.filename : existentViand.image,
+      };
     } catch (error) {
       throw new BadGatewayException('Error modifying viand by id');
     }

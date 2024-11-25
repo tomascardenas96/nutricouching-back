@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export default class ServiceDto {
   @IsString()
@@ -7,9 +7,6 @@ export default class ServiceDto {
   @IsString()
   description: string;
 
-  @IsNumber()
-  price: number;
-
-  @IsString()
-  image: string;
+  @IsNotEmpty()
+  price: string;
 }
