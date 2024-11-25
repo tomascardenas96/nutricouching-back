@@ -7,9 +7,6 @@ export class CreateProfessionalDto {
   @IsString()
   specialty: string;
 
-  @IsString()
-  image: string;
-
   @IsOptional()
   @IsString()
   facebookURL: string;

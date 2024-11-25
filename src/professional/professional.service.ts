@@ -2,6 +2,7 @@ import {
   Injectable,
   BadGatewayException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
@@ -20,16 +21,23 @@ export class ProfessionalService {
     private readonly serviceService: ServiceService,
   ) {}
 
-  create({
-    fullname,
-    specialty,
-    email,
-    phone,
-    facebookURL,
-    youtubeURL,
-    instagramURL,
-  }: CreateProfessionalDto): Promise<Professional> {
+  create(
+    {
+      fullname,
+      specialty,
+      email,
+      phone,
+      facebookURL,
+      youtubeURL,
+      instagramURL,
+    }: CreateProfessionalDto,
+    file: Express.Multer.File,
+  ): Promise<Professional> {
     try {
+      if (!file) {
+        throw new BadRequestException('File no selected');
+      }
+
       const professional: Professional = new Professional();
 
       professional.professionalId = crypto.randomUUID();
@@ -37,12 +45,16 @@ export class ProfessionalService {
       professional.specialty = specialty;
       professional.email = email;
       professional.phone = phone;
+      professional.image = file ? file.filename : null;
       professional.facebookURL = facebookURL ? facebookURL : null;
       professional.youtubeURL = youtubeURL ? youtubeURL : null;
       professional.instagramURL = instagramURL ? instagramURL : null;
 
       return this.professionalRepository.save(professional);
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadGatewayException('Error creating professional');
     }
   }
@@ -129,6 +141,29 @@ export class ProfessionalService {
         throw error;
       }
       throw new BadGatewayException('Error getting professionals by service');
+    }
+  }
+
+  modifyProfessional(
+    professionalId: string,
+    updatedProfessional: UpdateProfessionalDto,
+    file: Express.Multer.File,
+  ) {
+    try {
+      return this.professionalRepository.update(professionalId, {
+        ...updatedProfessional,
+        image: file ? file.filename : undefined,
+      });
+    } catch (error) {
+      throw new BadGatewayException('Error modifying professional by id');
+    }
+  }
+
+  deleteProfessional(professionalId: string) {
+    try {
+      return this.professionalRepository.delete(professionalId);
+    } catch (error) {
+      throw new BadGatewayException('Error deleting professional');
     }
   }
 }
