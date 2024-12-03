@@ -128,4 +128,5 @@ src/
 
 #### 5) Diagrama de Relacion de Entidades
 
-![Captura de pantalla 2024-11-08 123313](https://github.com/user-attachments/assets/1ba6c9d4-461c-4aad-b3be-c235bf815611)
+![Captura de pantalla 2024-12-03 112152](https://github.com/user-attachments/assets/05d27b37-6813-4636-8996-a56a1f3f39ba)
+
