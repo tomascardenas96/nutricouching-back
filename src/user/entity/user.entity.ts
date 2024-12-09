@@ -61,7 +61,7 @@ export class User {
     eager: true,
   })
   @JoinColumn({ name: 'professional' })
-  professionl: Professional;
+  professional: Professional;
 
   @OneToOne(() => Cart, (cart) => cart.user)
   @JoinColumn({ name: 'cart' })

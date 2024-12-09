@@ -17,6 +17,7 @@ import { ClientOrderModule } from './client-order/client-order.module';
 import { CartItemModule } from './cart-item/cart-item.module';
 import { PaymentModule } from './payment/payment.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { SpecialtyModule } from './specialty/specialty.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/uploads'
     }),
+    SpecialtyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,58 +1,64 @@
 import {
-  Injectable,
   BadGatewayException,
-  NotFoundException,
   BadRequestException,
+  Injectable,
+  NotFoundException
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Specialty } from '../specialty/entities/specialty.entity';
+import { SpecialtyService } from '../specialty/specialty.service';
+import { User } from '../user/entity/user.entity';
+import { UserService } from '../user/user.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Professional } from './entities/professional.entity';
-import { Repository } from 'typeorm';
-import { ServiceService } from 'src/service/service.service';
-import { AssignServiceDto } from './dto/assign-service.dto';
-import { Service } from 'src/service/entities/service.entity';
 
 @Injectable()
 export class ProfessionalService {
   constructor(
     @InjectRepository(Professional)
     private readonly professionalRepository: Repository<Professional>,
-    private readonly serviceService: ServiceService,
+    // private readonly serviceService: ServiceService,
+    private readonly userService: UserService,
+    private readonly specialtyService: SpecialtyService,
   ) {}
 
-  create(
-    {
-      fullname,
-      specialty,
-      email,
-      phone,
-      facebookURL,
-      youtubeURL,
-      instagramURL,
-    }: CreateProfessionalDto,
+  async create(
+    { userId, specialtyId, availability }: CreateProfessionalDto,
     file: Express.Multer.File,
-  ): Promise<Professional> {
+  ): Promise<any> {
     try {
-      if (!file) {
-        throw new BadRequestException('File no selected');
-      }
+      // if (!file) {
+      //   throw new BadRequestException('File non-selected');
+      // }
 
+      //Obtenemos por Id al usuario que queremos definir como profesional.
+      const user: User = await this.userService.findUserById(userId);
+
+      //Creamos una instancia de la clase Professional
       const professional: Professional = new Professional();
 
+      //
+      const specialties = await this.getSpecialitiesByArrayOfIds(specialtyId);
+      // const createAvailability =
+      //   await this.availabilityService.createProfessionalScheduleByArray(
+      //     availability,
+      //   );
+
       professional.professionalId = crypto.randomUUID();
-      professional.fullname = fullname;
-      professional.specialty = specialty;
-      professional.email = email;
-      professional.phone = phone;
-      professional.image = file ? file.filename : null;
-      professional.facebookURL = facebookURL ? facebookURL : null;
-      professional.youtubeURL = youtubeURL ? youtubeURL : null;
-      professional.instagramURL = instagramURL ? instagramURL : null;
+      professional.fullname = `${user.name} ${user.lastname}`;
+      professional.email = user.email;
+      professional.image = file ? file.filename : undefined;
+      professional.specialty = specialties;
 
       return this.professionalRepository.save(professional);
     } catch (error) {
-      if (error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new BadGatewayException('Error creating professional');
@@ -67,32 +73,18 @@ export class ProfessionalService {
     }
   }
 
-  async assignService({
-    professionalId,
-    serviceId,
-  }: AssignServiceDto): Promise<Professional> {
+  private async getSpecialitiesByArrayOfIds(specialtyId: string[]) {
     try {
-      const professional: Professional =
-        await this.findProfessionalById(professionalId);
-      const service: Service =
-        await this.serviceService.findServiceById(serviceId);
+      const specialties = [];
 
-      //Si no existe ningun servicio para este profesional, se inicializara con un arreglo vacio su propiedad service.
-      if (!professional.service) {
-        professional.service = [];
-      }
+      specialtyId.forEach(async (spId) => {
+        const specialty: Specialty =
+          await this.specialtyService.getSpecialtyById(spId);
 
-      //En caso que exista un servicio asignado que coincida con el servicio a agregar no se realizara ninguna operacion,
-      //De lo contrario se hara un push con el servicio dentro del arreglo de servicios de la entidad 'professional'.
-      const isAssignedService: boolean = professional.service.some(
-        (assignedService) => assignedService.serviceId === service.serviceId,
-      );
+        specialties.push(specialty);
+      });
 
-      if (!isAssignedService) {
-        professional.service.push(service);
-      }
-
-      return await this.professionalRepository.save(professional);
+      return specialties;
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -107,11 +99,19 @@ export class ProfessionalService {
     }
   }
 
+  async getAvailabilityByArrayOfIds(availabilityId: string[]) {
+    try {
+    } catch (error) {
+      throw new BadGatewayException(
+        'Error getting availability by an array of availabilityId',
+      );
+    }
+  }
+
   async findProfessionalById(professionalId: string): Promise<Professional> {
     try {
       const professional = await this.professionalRepository.findOne({
         where: { professionalId },
-        relations: ['service'],
       });
 
       if (!professional) {
@@ -127,12 +127,17 @@ export class ProfessionalService {
     }
   }
 
-  async findProfessionalsByService(serviceId: string): Promise<Professional[]> {
-    try {
-      const service: Service =
-        await this.serviceService.findServiceById(serviceId);
+  async findProfessionalsBySpecialty(
+    specialtyId: string,
+  ): Promise<Professional[]> {
+    const specialty = await this.specialtyService.getSpecialtyById(specialtyId);
 
-      return this.professionalRepository.find({ where: { service } });
+    if (!specialty) {
+      throw new NotFoundException('Specialty not found');
+    }
+
+    try {
+      return this.professionalRepository.find({ where: { specialty } });
     } catch (error) {
       if (
         error instanceof NotFoundException ||
@@ -150,10 +155,10 @@ export class ProfessionalService {
     file: Express.Multer.File,
   ) {
     try {
-      return this.professionalRepository.update(professionalId, {
-        ...updatedProfessional,
-        image: file ? file.filename : undefined,
-      });
+      // return this.professionalRepository.update(professionalId, {
+      //   ...updatedProfessional,
+      //   image: file ? file.filename : undefined,
+      // });
     } catch (error) {
       throw new BadGatewayException('Error modifying professional by id');
     }

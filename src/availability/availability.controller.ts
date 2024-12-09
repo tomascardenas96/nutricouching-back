@@ -7,10 +7,10 @@ export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 
   @Post()
-  createProfessionalSchedule(
-    @Body() createAvailabilityDto: CreateAvailabilityDto,
+  createProfessionalScheduleByArray(
+    @Body() createAvailabilityDto: CreateAvailabilityDto[],
   ) {
-    return this.availabilityService.createProfessionalSchedule(
+    return this.availabilityService.createProfessionalScheduleByArray(
       createAvailabilityDto,
     );
   }

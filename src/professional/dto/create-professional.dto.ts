@@ -1,27 +1,14 @@
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsString } from 'class-validator';
+import { AvailabilityInterface } from '../interface/availability.interface';
+import { CreateAvailabilityDto } from 'src/availability/dto/create-availability.dto';
 
 export class CreateProfessionalDto {
   @IsString()
-  fullname: string;
+  userId: string;
 
-  @IsString()
-  specialty: string;
+  @IsArray()
+  specialtyId: string[];
 
-  @IsOptional()
-  @IsString()
-  facebookURL: string;
-
-  @IsOptional()
-  @IsString()
-  youtubeURL: string;
-
-  @IsOptional()
-  @IsString()
-  instagramURL: string;
-
-  @IsEmail()
-  email: string;
-
-  @IsString()
-  phone: string;
+  @IsArray()
+  availability: CreateAvailabilityDto[];
 }

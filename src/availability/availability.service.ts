@@ -4,11 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BookingService } from 'src/booking/booking.service';
-import { Days } from 'src/common/enum/days.enum';
-import { Professional } from 'src/professional/entities/professional.entity';
-import { ProfessionalService } from 'src/professional/professional.service';
 import { Repository } from 'typeorm';
+import { BookingService } from '../booking/booking.service';
+import { Days } from '../common/enum/days.enum';
+import { Professional } from '../professional/entities/professional.entity';
+import { ProfessionalService } from '../professional/professional.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { Availability } from './entities/availability.entity';
 
@@ -17,30 +17,17 @@ export class AvailabilityService {
   constructor(
     @InjectRepository(Availability)
     private readonly availabilityRepository: Repository<Availability>,
-    private readonly professionalService: ProfessionalService,
     private readonly bookingService: BookingService,
+    private readonly professionalService: ProfessionalService,
   ) {}
 
   //Creamos los dias y horarios en que el profesional va a atender.
   async createProfessionalSchedule(
     createAvailabilityDto: CreateAvailabilityDto,
   ) {
-    const {
-      professionalId,
-      day,
-      startTime,
-      endTime,
-      interval = 30,
-    } = createAvailabilityDto;
+    const { day, startTime, endTime, interval = 30 } = createAvailabilityDto;
 
     try {
-      const professional =
-        await this.professionalService.findProfessionalById(professionalId);
-
-      if (!professional) {
-        throw new NotFoundException('Professional not found');
-      }
-
       const availabilities: Availability[] = [];
 
       let currentTime = new Date(`1970-01-01T${startTime}:00`);
@@ -61,7 +48,7 @@ export class AvailabilityService {
           day,
           startTime: start,
           endTime: end,
-          professional,
+          // professional,
         });
 
         availabilities.push(availability);
@@ -72,6 +59,61 @@ export class AvailabilityService {
       if (error instanceof NotFoundException) {
         throw error;
       }
+      throw new BadGatewayException(
+        'Error creating availability of professionals',
+      );
+    }
+  }
+
+  async createProfessionalScheduleByArray(
+    av: CreateAvailabilityDto[],
+  ): Promise<Availability[]> {
+    try {
+      //Creamos un arreglo vacio
+      const availabilities: Availability[] = [];
+
+      av.forEach((item) => {
+        const interval = item.interval;
+
+        for (let i: number = 0; i < item.day.length; i++) {
+          //Creamos una variable para la hora de inicio y la hora de fin, dandole formato de tipo Date.
+          let startTime = new Date(`1970-01-01T${item.startTime}:00`);
+          const finalTime = new Date(`1970-01-01T${item.endTime}:00`);
+
+          //Iteramos hasta que el horario actual sea igual a la hora de finalizacion.
+          while (startTime < finalTime) {
+            const dayValue = item.day[i] as Days;
+            //A la fecha startTime le extraemos la hora, la convertimos a string y posteriormente tomamos los primeros 5 caracteres de la cadena de texto generada.
+            const start = startTime.toTimeString().substring(0, 5);
+
+            //Le agregamos la cantidad de minutos establecida en la variable interval.
+            startTime.setMinutes(startTime.getMinutes() + interval);
+
+            //Y aca volvemos a extraer el horario actualizado.
+            const end = startTime.toTimeString().substring(0, 5);
+
+            const availability: Availability =
+              this.availabilityRepository.create({
+                day: dayValue,
+                startTime: start,
+                endTime: end,
+                interval: item.interval,
+              });
+
+            availabilities.push(availability);
+          }
+        }
+      });
+
+      return await this.availabilityRepository.save(availabilities);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
+        throw error;
+      }
+      console.error(error);
       throw new BadGatewayException(
         'Error creating availability of professionals',
       );
@@ -126,7 +168,7 @@ export class AvailabilityService {
       );
 
       const availableTimes = availabilities.filter((availability) => {
-        const currentTime = availability.startTime + ':00';
+        const startTime = availability.startTime + ':00';
         const subtractedDayOfAvailabilityObject = availability.day.substring(
           0,
           3,
@@ -134,7 +176,7 @@ export class AvailabilityService {
 
         // Verificar si ese horario ya fue reservado (compara con fecha y hora)
         return (
-          !bookedSet.has(`${targetDateString}:${currentTime}`) &&
+          !bookedSet.has(`${targetDateString}:${startTime}`) &&
           subtractedDayOfAvailabilityObject === subtractedDate
         );
       });

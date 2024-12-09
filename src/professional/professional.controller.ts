@@ -10,7 +10,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { AssignServiceDto } from './dto/assign-service.dto';
+import { AssignSpecialtyDto } from './dto/assign-specialty.dto';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { ProfessionalService } from './professional.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -57,14 +57,9 @@ export class ProfessionalController {
     return this.professionalService.findAll();
   }
 
-  @Post('assign-service')
-  assignService(@Body() assignServiceDto: AssignServiceDto) {
-    return this.professionalService.assignService(assignServiceDto);
-  }
-
-  @Get('service')
-  findProfessionalsByService(@Query('id') serviceId: string) {
-    return this.professionalService.findProfessionalsByService(serviceId);
+  @Get('specialty')
+  findProfessionalsBySpecialty(@Query('id') specialtyId: string) {
+    return this.professionalService.findProfessionalsBySpecialty(specialtyId);
   }
 
   @Patch('update/:professionalId')

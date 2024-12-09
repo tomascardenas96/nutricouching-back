@@ -1,6 +1,7 @@
 import { Availability } from 'src/availability/entities/availability.entity';
 import { Booking } from 'src/booking/entities/booking.entity';
 import { Service } from 'src/service/entities/service.entity';
+import { Specialty } from 'src/specialty/entities/specialty.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,
@@ -21,10 +22,7 @@ export class Professional {
   @Column()
   fullname: string;
 
-  @Column()
-  specialty: string;
-
-  @Column()
+  @Column({ nullable: true })
   image: string;
 
   @Column({ nullable: true })
@@ -39,18 +37,23 @@ export class Professional {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   phone: string;
-
-  @ManyToMany(() => Service, (service) => service.professional)
-  service: Service[];
 
   @OneToMany(() => Booking, (booking) => booking.professional)
   booking: Booking[];
 
-  @OneToMany(() => Availability, (availability) => availability.professional)
+  @OneToMany(() => Availability, (availability) => availability.professional, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'availability' })
   availability: Availability[];
 
-  @OneToOne(() => User, (user) => user.professionl)
+  @OneToOne(() => User, (user) => user.professional)
   user: User;
+
+  @ManyToMany(() => Specialty, (specialty) => specialty.professional, {
+    onDelete: 'CASCADE',
+  })
+  specialty: Specialty[];
 }

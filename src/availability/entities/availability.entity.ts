@@ -14,7 +14,9 @@ export class Availability {
   @PrimaryGeneratedColumn('uuid')
   availabilityId: string;
 
-  @ManyToOne(() => Professional, (professional) => professional.availability)
+  @ManyToOne(() => Professional, (professional) => professional.availability, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'professional' })
   professional: Professional;
 
@@ -26,4 +28,7 @@ export class Availability {
 
   @Column()
   endTime: string;
+
+  @Column()
+  interval: number;
 }

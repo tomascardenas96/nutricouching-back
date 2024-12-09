@@ -1,6 +1,7 @@
 import { Booking } from 'src/booking/entities/booking.entity';
 import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
+import { Specialty } from 'src/specialty/entities/specialty.entity';
 import {
   Entity,
   PrimaryColumn,
@@ -33,20 +34,9 @@ export class Service {
   @OneToMany(() => Booking, (booking) => booking.service)
   booking: Booking;
 
-  @ManyToMany(() => Professional, (professional) => professional.service)
-  @JoinTable({
-    name: 'professional-by-service',
-    joinColumn: {
-      name: 'service',
-      referencedColumnName: 'serviceId',
-    },
-    inverseJoinColumn: {
-      name: 'professional',
-      referencedColumnName: 'professionalId',
-    },
-  })
-  professional: Professional[];
-
   @OneToMany(() => CartItem, (cartItem) => cartItem.service)
   cartItem: CartItem[];
+
+  @OneToMany(() => Specialty, (specialty) => specialty.service)
+  specialty: Specialty[];
 }

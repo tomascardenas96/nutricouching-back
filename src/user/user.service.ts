@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, IsNull, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entity/user.entity';
 import { CartService } from 'src/cart/cart.service';
@@ -16,6 +16,14 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly cartService: CartService,
   ) {}
+
+  async getAllUsers() {
+    try {
+      return this.userRepository.find();
+    } catch (error) {
+      throw new BadGatewayException('Error getting all users');
+    }
+  }
 
   async createUser(user: CreateUserDto): Promise<User> {
     // Verificamos si existe el email y nombre de usuario.
@@ -79,6 +87,16 @@ export class UserService {
       return this.userRepository.save(user);
     } catch (error) {
       throw new Error('Error verifying user');
+    }
+  }
+
+  async getNonProfessionalsUsersByEmail(email: string): Promise<User[]> {
+    try {
+      return this.userRepository.find({
+        where: { email: ILike(`%${email}%`), professional: IsNull() },
+      });
+    } catch (error) {
+      throw new BadGatewayException('Error getting users by email');
     }
   }
 
