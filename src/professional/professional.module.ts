@@ -6,10 +6,11 @@ import { UserModule } from '../user/user.module';
 import { Professional } from './entities/professional.entity';
 import { ProfessionalController } from './professional.controller';
 import { ProfessionalService } from './professional.service';
+import { Specialty } from 'src/specialty/entities/specialty.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Professional]),
+    TypeOrmModule.forFeature([Professional, Specialty]),
     // ServiceModule,
     UserModule,
     SpecialtyModule,

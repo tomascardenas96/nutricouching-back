@@ -2,13 +2,15 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, IsNull, Repository } from 'typeorm';
+import { ILike, IsNull, Repository, UpdateResult } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entity/user.entity';
 import { CartService } from 'src/cart/cart.service';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { Professional } from 'src/professional/entities/professional.entity';
 
 @Injectable()
 export class UserService {
@@ -97,6 +99,32 @@ export class UserService {
       });
     } catch (error) {
       throw new BadGatewayException('Error getting users by email');
+    }
+  }
+
+  async assignAsProfessional(
+    userId: string,
+    professional: Professional,
+  ): Promise<User> {
+    try {
+      // Buscar al usuario existente
+      const user = await this.userRepository.findOne({
+        where: { userId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Asociar el profesional al usuario
+      user.professional = professional;
+
+      // Guardar los cambios
+      return await this.userRepository.save(user);
+    } catch (error) {
+      throw new BadGatewayException(
+        'Error trying to assign a user as professional',
+      );
     }
   }
 

@@ -80,9 +80,23 @@ export class SpecialtyService {
     return `This action removes a #${id} specialty`;
   }
 
-  getSpecialtyById(specialtyId: string): Promise<Specialty> {
+  async getSpecialtyById(specialtyId: string): Promise<Specialty> {
     try {
       return this.specialtyRepository.findOne({ where: { specialtyId } });
+    } catch (error) {
+      throw new BadGatewayException('Error getting specialty by id');
+    }
+  }
+
+  async getSpecialtiesById(specialties: Specialty[]): Promise<Specialty[]> {
+    try {
+      const specialtiesList = await Promise.all(
+        specialties.map(async (specialty) => {
+          return this.getSpecialtyById(specialty.specialtyId);
+        }),
+      );
+
+      return specialtiesList;
     } catch (error) {
       throw new BadGatewayException('Error getting specialty by id');
     }
@@ -118,5 +132,10 @@ export class SpecialtyService {
         'Error verifying and creating specialties by array',
       );
     }
+  }
+
+  async assignSpecialtyToAProfessional() {
+    try {
+    } catch (error) {}
   }
 }

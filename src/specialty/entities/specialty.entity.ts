@@ -18,7 +18,7 @@ export class Specialty {
   @Column()
   name: string;
 
-  @ManyToOne(() => Service, (service) => service.specialty)
+  @ManyToOne(() => Service, (service) => service.specialty, { eager: true })
   @JoinColumn({ name: 'service' })
   service: Service;
 

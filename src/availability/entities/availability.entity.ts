@@ -16,6 +16,7 @@ export class Availability {
 
   @ManyToOne(() => Professional, (professional) => professional.availability, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'professional' })
   professional: Professional;

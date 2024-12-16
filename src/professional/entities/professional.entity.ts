@@ -1,5 +1,6 @@
 import { Availability } from 'src/availability/entities/availability.entity';
 import { Booking } from 'src/booking/entities/booking.entity';
+import { Role } from 'src/common/enum/role.enum';
 import { Service } from 'src/service/entities/service.entity';
 import { Specialty } from 'src/specialty/entities/specialty.entity';
 import { User } from 'src/user/entity/user.entity';
@@ -54,6 +55,10 @@ export class Professional {
 
   @ManyToMany(() => Specialty, (specialty) => specialty.professional, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   specialty: Specialty[];
+
+  @Column({ type: 'enum', enum: Role, default: Role.ADMIN })
+  role: Role;
 }

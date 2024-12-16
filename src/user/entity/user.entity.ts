@@ -33,9 +33,6 @@ export class User {
   @Column({ select: false })
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.GUEST_USER })
-  role: Role;
-
   @Column({ type: 'enum', enum: Plan, default: Plan.NO_PLAN })
   plan: Plan;
 
@@ -59,6 +56,7 @@ export class User {
 
   @OneToOne(() => Professional, (professional) => professional.user, {
     eager: true,
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'professional' })
   professional: Professional;
