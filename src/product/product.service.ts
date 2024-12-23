@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
@@ -114,6 +115,25 @@ export class ProductService {
       };
     } catch (error) {
       throw new BadGatewayException('Error modifying product by id');
+    }
+  }
+
+  async getProductById(productId: string): Promise<Product> {
+    try {
+      const product: Product = await this.productRepository.findOne({
+        where: { productId },
+      });
+
+      if (!product) {
+        throw new NotFoundException('Product not found getting by id');
+      }
+
+      return product;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting product by id');
     }
   }
 }

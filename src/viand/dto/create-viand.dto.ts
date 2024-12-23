@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString
+} from 'class-validator';
+import { AddIngredientsInterface } from '../interfaces/AddIngredients.interface';
 
 export class CreateViandDto {
   @IsString()
@@ -14,6 +20,8 @@ export class CreateViandDto {
   description: string;
 
   @IsOptional()
-  @IsString()
   image?: string;
+
+  @IsArray()
+  ingredients: AddIngredientsInterface[];
 }

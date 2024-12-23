@@ -2,18 +2,21 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Viand } from './entities/viand.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { CreateViandDto } from './dto/create-viand.dto';
 import { UpdateViandDto } from './dto/update-viand.dto';
+import { IngredientService } from 'src/ingredient/ingredient.service';
 
 @Injectable()
 export class ViandService {
   constructor(
     @InjectRepository(Viand)
     private readonly viandRepository: Repository<Viand>,
+    private readonly ingredientService: IngredientService,
   ) {}
 
   async createNewViand(
@@ -40,6 +43,13 @@ export class ViandService {
         price: Number(createViandDto.price),
         image: file ? file.filename : null,
       });
+
+      const ingredients = await this.ingredientService.createIngredientsByArray(
+        createViandDto.ingredients,
+      );
+
+      viand.ingredients = ingredients;
+
       return this.viandRepository.save(viand);
     } catch (error) {
       if (error instanceof BadRequestException) {
@@ -104,6 +114,26 @@ export class ViandService {
       };
     } catch (error) {
       throw new BadGatewayException('Error modifying viand by id');
+    }
+  }
+
+  async getViandById(viandId: string): Promise<Viand> {
+    try {
+      const viand: Viand = await this.viandRepository.findOne({
+        where: { viandId },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (!viand) {
+        throw new NotFoundException('Viand not found');
+      }
+
+      return viand;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting viand by id');
     }
   }
 }

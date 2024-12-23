@@ -1,7 +1,12 @@
-import { Injectable, BadGatewayException } from '@nestjs/common';
+import {
+  Injectable,
+  BadGatewayException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cart } from './entities/cart.entity';
 import { Repository } from 'typeorm';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class CartService {
@@ -19,11 +24,22 @@ export class CartService {
     }
   }
 
-//   async getCartById(cartId: string) {
-//     try {
-//       return this.cartRepository.findOne({ where: { cartId } });
-//     } catch (error) {
-//       throw new BadGatewayException('Error getting cart by id');
-//     }
-//   }
+  async getCartById(cartId: string): Promise<Cart> {
+    try {
+      const cart: Cart = await this.cartRepository.findOne({
+        where: { cartId },
+      });
+
+      if (!cart) {
+        throw new NotFoundException('Cart not found');
+      }
+
+      return cart;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting cart by id');
+    }
+  }
 }

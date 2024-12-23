@@ -18,6 +18,7 @@ import { CartItemModule } from './cart-item/cart-item.module';
 import { PaymentModule } from './payment/payment.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { SpecialtyModule } from './specialty/specialty.module';
+import { IngredientModule } from './ingredient/ingredient.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { SpecialtyModule } from './specialty/specialty.module';
       serveRoot: '/uploads'
     }),
     SpecialtyModule,
+    IngredientModule,
   ],
   controllers: [AppController],
   providers: [AppService],

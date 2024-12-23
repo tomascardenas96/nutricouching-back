@@ -1,5 +1,12 @@
 import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Ingredient } from 'src/ingredient/entities/ingredient.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Viand {
@@ -27,9 +34,15 @@ export class Viand {
   @Column({
     default:
       'https://www.syncros.com/_ui/responsive/common/images/no-product-image-available.png',
+    nullable: true,
   })
   image: string;
 
   @Column({ default: true })
   isActive: boolean;
+
+  @ManyToMany(() => Ingredient, (ingredient) => ingredient.viands, {
+    onDelete: 'CASCADE',
+  })
+  ingredients: Ingredient[];
 }

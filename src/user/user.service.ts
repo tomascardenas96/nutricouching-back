@@ -11,6 +11,7 @@ import { User } from './entity/user.entity';
 import { CartService } from 'src/cart/cart.service';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
+import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
 
 @Injectable()
 export class UserService {
@@ -72,10 +73,19 @@ export class UserService {
 
   async findUserById(userId: string): Promise<User> {
     try {
-      return await this.userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: { userId },
       });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return user;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new BadGatewayException('Error getting user by id');
     }
   }
