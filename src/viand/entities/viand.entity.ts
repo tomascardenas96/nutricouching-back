@@ -43,6 +43,7 @@ export class Viand {
 
   @ManyToMany(() => Ingredient, (ingredient) => ingredient.viands, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   ingredients: Ingredient[];
 }

@@ -26,11 +26,17 @@ export class CartItem {
   @JoinColumn({ name: 'service' })
   service?: Service;
 
-  @ManyToOne(() => Viand, (viand) => viand.cartItem)
+  @ManyToOne(() => Viand, (viand) => viand.cartItem, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
   @JoinColumn({ name: 'viand' })
   viand?: Viand;
 
-  @ManyToOne(() => Product, (product) => product.cartItem)
+  @ManyToOne(() => Product, (product) => product.cartItem, {
+    onDelete: 'CASCADE',
+    eager: true
+  })
   @JoinColumn({ name: 'product' })
   product?: Product;
 }

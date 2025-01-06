@@ -124,15 +124,12 @@ export class ProductService {
         where: { productId },
       });
 
-      if (!product) {
-        throw new NotFoundException('Product not found getting by id');
+      if (!product || !productId) {
+        return null;
       }
 
       return product;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
       throw new BadGatewayException('Error getting product by id');
     }
   }

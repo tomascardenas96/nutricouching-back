@@ -2,9 +2,11 @@ import {
   IsArray,
   IsNotEmpty,
   IsOptional,
-  IsString
+  IsString,
+  ValidateNested,
 } from 'class-validator';
 import { AddIngredientsInterface } from '../interfaces/AddIngredients.interface';
+import { Type } from 'class-transformer';
 
 export class CreateViandDto {
   @IsString()
@@ -22,6 +24,6 @@ export class CreateViandDto {
   @IsOptional()
   image?: string;
 
-  @IsArray()
+  @IsOptional()
   ingredients: AddIngredientsInterface[];
 }

@@ -44,6 +44,11 @@ export class ViandService {
         image: file ? file.filename : null,
       });
 
+      // Parseamos los ingredientes si vienen en formato JSON
+      if (typeof createViandDto.ingredients === 'string') {
+        createViandDto.ingredients = JSON.parse(createViandDto.ingredients);
+      }
+
       const ingredients = await this.ingredientService.createIngredientsByArray(
         createViandDto.ingredients,
       );
@@ -52,7 +57,11 @@ export class ViandService {
 
       return this.viandRepository.save(viand);
     } catch (error) {
-      if (error instanceof BadRequestException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
         throw error;
       }
       throw new BadGatewayException('Error creating a new viand');
@@ -124,15 +133,12 @@ export class ViandService {
         order: { createdAt: 'DESC' },
       });
 
-      if (!viand) {
-        throw new NotFoundException('Viand not found');
+      if (!viand || !viandId) {
+        return null;
       }
 
       return viand;
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
       throw new BadGatewayException('Error getting viand by id');
     }
   }
