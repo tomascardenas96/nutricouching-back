@@ -100,4 +100,9 @@ export class ProfessionalController {
   deleteProfessional(@Param('professionalId') professionalId: string) {
     return this.professionalService.deleteProfessional(professionalId);
   }
+
+  @Get('service/:serviceId')
+  findProfessionalsByService(@Param('serviceId') serviceId: string) {
+    return this.professionalService.findProfessionalsByService(serviceId);
+  }
 }

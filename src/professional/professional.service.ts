@@ -14,6 +14,8 @@ import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { Professional } from './entities/professional.entity';
 import { AvailabilityService } from 'src/availability/availability.service';
+import { ServiceService } from 'src/service/service.service';
+import { Service } from 'src/service/entities/service.entity';
 
 @Injectable()
 export class ProfessionalService {
@@ -24,6 +26,7 @@ export class ProfessionalService {
     private readonly specialtyRepository: Repository<Specialty>,
     private readonly userService: UserService,
     private readonly specialtyService: SpecialtyService,
+    private readonly serviceService: ServiceService,
   ) {}
 
   async create(
@@ -107,6 +110,37 @@ export class ProfessionalService {
         throw error;
       }
       throw new BadGatewayException('Error trying to find professional by id');
+    }
+  }
+
+  async findProfessionalsByService(serviceId: string): Promise<Professional[]> {
+    try {
+      const service: Service =
+        await this.serviceService.findServiceById(serviceId);
+
+      const specialties: Specialty[] =
+        await this.specialtyService.getSpecialtiesByService(service);
+
+      const professionalsByService: Professional[] = [];
+
+      for (const specialty of specialties) {
+        const foundProfessionals: Professional[] =
+          await this.findProfessionalsBySpecialty(specialty.specialtyId);
+
+        foundProfessionals.forEach((spe) => {
+          professionalsByService.push(spe);
+        });
+      }
+
+      return professionalsByService;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting professionals by service');
     }
   }
 

@@ -179,10 +179,12 @@ export class AvailabilityService {
         order: { day: 'asc' },
       });
 
-      // Devolvemos un conjunto de días únicos de disponibilidad
-      return [
+      const days = [
         ...new Set(availabilities.map((availability) => availability.day)),
       ];
+
+      // Devolvemos un conjunto de días únicos de disponibilidad
+      return days;
     } catch (error) {
       // Manejamos errores en la obtención de días de disponibilidad
       throw new BadGatewayException(

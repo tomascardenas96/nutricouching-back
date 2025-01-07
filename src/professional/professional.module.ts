@@ -7,14 +7,15 @@ import { Professional } from './entities/professional.entity';
 import { ProfessionalController } from './professional.controller';
 import { ProfessionalService } from './professional.service';
 import { Specialty } from 'src/specialty/entities/specialty.entity';
+import { ServiceModule } from 'src/service/service.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Professional, Specialty]),
-    // ServiceModule,
     UserModule,
     SpecialtyModule,
-    ProfessionalModule
+    ProfessionalModule,
+    ServiceModule
   ],
   controllers: [ProfessionalController],
   providers: [ProfessionalService],

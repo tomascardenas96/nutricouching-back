@@ -37,6 +37,8 @@ export class Service {
   @OneToMany(() => CartItem, (cartItem) => cartItem.service)
   cartItem: CartItem[];
 
-  @OneToMany(() => Specialty, (specialty) => specialty.service)
+  @OneToMany(() => Specialty, (specialty) => specialty.service, {
+    onDelete: 'CASCADE',
+  })
   specialty: Specialty[];
 }

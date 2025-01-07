@@ -102,6 +102,23 @@ export class SpecialtyService {
     }
   }
 
+  async getSpecialtiesByService(service: Service): Promise<Specialty[]> {
+    try {
+      return await this.specialtyRepository.find({ where: { service } });
+    } catch (error) {
+      throw new BadGatewayException('Error getting specialtiesByServiceId');
+    }
+  }
+
+  async getSpecialtiesByProfessional() {
+    try {
+    } catch (error) {
+      throw new BadGatewayException(
+        'Error getting specialties by professional',
+      );
+    }
+  }
+
   async verifyAndCreateSpecialtiesByArray(
     createSpecialtyDto: CreateSpecialtyDto[],
   ): Promise<Specialty[]> {
