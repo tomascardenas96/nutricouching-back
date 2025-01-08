@@ -31,6 +31,11 @@ export class SpecialtyController {
     return this.specialtyService.findByQuery(name);
   }
 
+  @Get('service/:serviceId')
+  getSpecialtiesByService(@Param('serviceId') serviceId: string) {
+    return this.specialtyService.getSpecialtiesByService(serviceId);
+  }
+
   @Post('/list')
   verifyAndCreateSpecialtiesByArray(
     @Body() createSpecialtyDto: CreateSpecialtyDto[],

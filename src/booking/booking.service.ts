@@ -54,6 +54,8 @@ export class BookingService {
           createBookingDto.professionalId,
         );
 
+      booking.specialtyId = createBookingDto.specialtyId;
+
       return this.bookingRepository.save(booking);
     } catch (error) {
       if (
@@ -70,10 +72,6 @@ export class BookingService {
     try {
       const professional: Professional =
         await this.professionalService.findProfessionalById(professionalId);
-
-      if (!professional) {
-        throw new NotFoundException('Professional not found');
-      }
 
       return await this.bookingRepository.find({
         where: { professional },

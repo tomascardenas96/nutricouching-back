@@ -102,20 +102,12 @@ export class SpecialtyService {
     }
   }
 
-  async getSpecialtiesByService(service: Service): Promise<Specialty[]> {
+  async getSpecialtiesByService(serviceId: string): Promise<Specialty[]> {
     try {
+      const service = await this.serviceService.findServiceById(serviceId);
       return await this.specialtyRepository.find({ where: { service } });
     } catch (error) {
       throw new BadGatewayException('Error getting specialtiesByServiceId');
-    }
-  }
-
-  async getSpecialtiesByProfessional() {
-    try {
-    } catch (error) {
-      throw new BadGatewayException(
-        'Error getting specialties by professional',
-      );
     }
   }
 

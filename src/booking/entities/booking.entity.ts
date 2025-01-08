@@ -21,15 +21,20 @@ export class Booking {
   @Column({ type: 'time' })
   time: string;
 
+  @Column()
+  specialtyId: string;
+
   @ManyToOne(() => Service, (service) => service.booking)
-  @JoinColumn({ name: 'serviceId' })
+  @JoinColumn({ name: 'service' })
   service: Service;
 
   @ManyToOne(() => User, (user) => user.booking)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user' })
   user: User;
 
-  @ManyToOne(() => Professional, (professional) => professional.booking)
-  @JoinColumn({ name: 'professionalId' })
+  @ManyToOne(() => Professional, (professional) => professional.booking, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'professional' })
   professional: Professional;
 }

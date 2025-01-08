@@ -115,11 +115,8 @@ export class ProfessionalService {
 
   async findProfessionalsByService(serviceId: string): Promise<Professional[]> {
     try {
-      const service: Service =
-        await this.serviceService.findServiceById(serviceId);
-
       const specialties: Specialty[] =
-        await this.specialtyService.getSpecialtiesByService(service);
+        await this.specialtyService.getSpecialtiesByService(serviceId);
 
       const professionalsByService: Professional[] = [];
 

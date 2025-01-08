@@ -2,6 +2,10 @@ import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateBookingDto {
   @IsNotEmpty()
+  @IsString()
+  specialtyId: string;
+
+  @IsNotEmpty()
   @IsDateString()
   date: Date;
 
