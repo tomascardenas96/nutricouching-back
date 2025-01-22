@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateBookingDto {
   @IsNotEmpty()
@@ -11,7 +11,15 @@ export class CreateBookingDto {
 
   @IsNotEmpty()
   @IsString()
-  time: string;
+  startTime: string;
+
+  @IsNotEmpty()
+  @IsString()
+  endTime: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  interval: number;
 
   @IsNotEmpty()
   @IsString()

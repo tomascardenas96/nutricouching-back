@@ -14,10 +14,10 @@ export class BookingController {
   }
 
   @Get('professional')
-  async getBookingsByProfessional(
+  async getBookingsByProfessionalByOrder(
     @Query('professionalId') professionalId: string,
   ) {
-    return this.bookingService.getBookingsByProfessional(professionalId);
+    return this.bookingService.getBookingsByProfessionalByOrder(professionalId);
   }
 
   @Get('available')

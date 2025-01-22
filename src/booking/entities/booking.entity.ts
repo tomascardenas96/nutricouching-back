@@ -19,21 +19,27 @@ export class Booking {
   date: Date;
 
   @Column({ type: 'time' })
-  time: string;
+  startTime: string;
+
+  @Column({ type: 'time' })
+  endTime: string;
+
+  @Column()
+  interval: number;
 
   @Column()
   specialtyId: string;
 
-  @ManyToOne(() => Service, (service) => service.booking)
+  @ManyToOne(() => Service, (service) => service.booking, { eager: true })
   @JoinColumn({ name: 'service' })
   service: Service;
 
-  @ManyToOne(() => User, (user) => user.booking)
+  @ManyToOne(() => User, (user) => user.booking, { eager: true })
   @JoinColumn({ name: 'user' })
   user: User;
 
   @ManyToOne(() => Professional, (professional) => professional.booking, {
-    eager: true,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'professional' })
   professional: Professional;

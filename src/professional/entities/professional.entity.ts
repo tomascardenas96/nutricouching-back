@@ -41,7 +41,9 @@ export class Professional {
   @Column({ nullable: true })
   phone: string;
 
-  @OneToMany(() => Booking, (booking) => booking.professional)
+  @OneToMany(() => Booking, (booking) => booking.professional, {
+    onDelete: 'CASCADE',
+  })
   booking: Booking[];
 
   @OneToMany(() => Availability, (availability) => availability.professional, {

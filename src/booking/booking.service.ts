@@ -27,7 +27,11 @@ export class BookingService {
     try {
       //Verificamos primero si existe la reservacion.
       const isBookingExistent: Booking[] = await this.bookingRepository.find({
-        where: { time: createBookingDto.time, date: createBookingDto.date },
+        where: {
+          startTime: createBookingDto.startTime,
+          endTime: createBookingDto.endTime,
+          date: createBookingDto.date,
+        },
       });
 
       if (isBookingExistent.length) {
@@ -39,7 +43,11 @@ export class BookingService {
 
       booking.date = new Date(createBookingDto.date + 'T00:00:00');
 
-      booking.time = createBookingDto.time;
+      booking.startTime = createBookingDto.startTime;
+
+      booking.endTime = createBookingDto.endTime;
+
+      booking.interval = createBookingDto.interval;
 
       booking.service = await this.serviceService.findServiceById(
         createBookingDto.serviceId,
@@ -75,10 +83,56 @@ export class BookingService {
 
       return await this.bookingRepository.find({
         where: { professional },
-        select: ['date', 'time'],
+        select: ['date', 'startTime', 'endTime'],
       });
     } catch (error) {
       if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting bookings by professional');
+    }
+  }
+
+  async getBookingsByProfessionalByOrder(professionalId: string) {
+    try {
+      const professional: Professional =
+        await this.professionalService.findProfessionalById(professionalId);
+
+      const bookings: Booking[] = await this.bookingRepository.find({
+        where: { professional },
+        select: ['date', 'startTime', 'endTime'],
+      });
+
+      const weekDay = [
+        'Lunes',
+        'Martes',
+        'Miercoles',
+        'Jueves',
+        'Viernes',
+        'Sabado',
+        'Domingo',
+      ];
+
+      const noRepeatedDates = new Set();
+
+      bookings.forEach((booking) => {
+        noRepeatedDates.add(booking.date);
+      });
+
+      const splitedBookings: Record<string, any[]> = {};
+
+      noRepeatedDates.forEach((date) => {
+        const filterBookingsByDay = bookings.filter((booking) => {
+          return booking.date === date;
+        });
+
+        splitedBookings[date.toString()] = filterBookingsByDay;
+      });
+
+      return splitedBookings;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
       }
       throw new BadGatewayException('Error getting bookings by professional');
     }

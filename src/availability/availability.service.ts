@@ -130,23 +130,24 @@ export class AvailabilityService {
       const bookedSlots =
         await this.bookingService.getBookingsByProfessional(professionalId);
 
-      // Creamos un conjunto de claves con las reservas para verificar la disponibilidad
-      const bookedSet = new Set(
-        bookedSlots.map((slot) => {
-          const bookedDate = DateTime.fromISO(
-            `${slot.date}T00:00:00`,
-          ).toISODate();
-          return `${bookedDate}:${slot.time}`;
-        }),
-      );
-
       // Filtramos las disponibilidades, asegurándonos que no estén reservadas
       return availabilities.filter((availability) => {
-        const slotKey = `${DateTime.fromISO(date).toISODate()}:${availability.startTime}`;
-        return (
-          availability.day.substring(0, 3) === targetDate &&
-          !bookedSet.has(slotKey)
-        );
+        const availabilityTime = DateTime.fromISO(
+          availability.startTime,
+        ).toFormat('HH:mm');
+
+        // Verificamos si el horario está reservado
+        const isBooked = bookedSlots.some((slot) => {
+          const slotTime = DateTime.fromISO(slot.startTime).toFormat('HH:mm');
+          return (
+            DateTime.fromISO(slot.date).toISODate() ===
+              DateTime.fromISO(date).toISODate() &&
+            slotTime === availabilityTime
+          );
+        });
+
+        // Retornamos solo las disponibilidades que coinciden con el día solicitado y no están reservadas
+        return availability.day.substring(0, 3) === targetDate && !isBooked;
       });
     } catch (error) {
       // Manejamos errores específicos o generales
