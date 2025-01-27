@@ -32,4 +32,10 @@ export class Availability {
 
   @Column()
   interval: number;
+
+  @Column()
+  slotStart: string;
+
+  @Column()
+  slotEnd: string;
 }

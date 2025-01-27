@@ -100,18 +100,8 @@ export class BookingService {
 
       const bookings: Booking[] = await this.bookingRepository.find({
         where: { professional },
-        select: ['date', 'startTime', 'endTime'],
+        select: ['date', 'startTime', 'endTime', 'specialtyId'],
       });
-
-      const weekDay = [
-        'Lunes',
-        'Martes',
-        'Miercoles',
-        'Jueves',
-        'Viernes',
-        'Sabado',
-        'Domingo',
-      ];
 
       const noRepeatedDates = new Set();
 
@@ -129,13 +119,30 @@ export class BookingService {
         splitedBookings[date.toString()] = filterBookingsByDay;
       });
 
-      return splitedBookings;
+      const sortedDate = this.sortScheduleByDate(splitedBookings);
+
+      return sortedDate;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
       throw new BadGatewayException('Error getting bookings by professional');
     }
+  }
+
+  private sortScheduleByDate(schedule) {
+    // Convertir el objeto en un arreglo de pares clave-valor
+    const entries = Object.entries(schedule);
+
+    // Ordenar el arreglo por fecha
+    entries.sort(([dateA], [dateB]) => {
+      const date1 = new Date(dateA).getTime();
+      const date2 = new Date(dateB).getTime();
+      return date1 - date2;
+    });
+
+    // Convertir el arreglo ordenado nuevamente en un objeto
+    return Object.fromEntries(entries);
   }
 
   async isDateAvailable(date: Date, professionalId: string): Promise<boolean> {

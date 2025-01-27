@@ -63,6 +63,8 @@ export class AvailabilityService {
                 endTime: end,
                 interval: item.interval,
                 professional,
+                slotStart: item.startTime,
+                slotEnd: item.endTime,
               });
 
             availabilities.push(availability);
@@ -205,5 +207,86 @@ export class AvailabilityService {
     const targetDate = DateTime.fromISO(date).toISODate();
 
     return targetDate < today;
+  }
+
+  /**
+   * Obtiene las franjas de horario organizadas por turno.
+   *
+   * @param professionalId - ID del profesional.
+   * @returns Un objeto con las franjas de horario organizadas por turno.
+   */
+  async getTimeSlotByProfessional(professionalId: string) {
+    try {
+      const professional =
+        await this.professionalService.findProfessionalById(professionalId);
+
+      const availabilities = await this.availabilityRepository.find({
+        where: { professional },
+      });
+
+      const slots = new Set();
+
+      availabilities.forEach((availability) => {
+        slots.add(availability.day);
+      });
+
+      const listOfAvailabilities = [];
+
+      slots.forEach((slot) => {
+        const availabilitiesByDay = availabilities.filter(
+          (availability) => availability.day === slot,
+        );
+
+        availabilitiesByDay.forEach((availability) => {
+          if (
+            !listOfAvailabilities.find((item) => {
+              // Verificamos que no exista (para que no se repitan)
+              return (
+                item.day === slot &&
+                item.startTime === availability.slotStart &&
+                item.endTime === availability.slotEnd
+              );
+            })
+          ) {
+            listOfAvailabilities.push({
+              day: slot,
+              startTime: availability.slotStart,
+              endTime: availability.slotEnd,
+            });
+          }
+        });
+      });
+
+      // Agrupar y ordenar
+      const groupedAvailabilities = listOfAvailabilities.reduce(
+        (acc, { day, startTime, endTime }) => {
+          if (!acc[day]) {
+            acc[day] = [];
+          }
+          acc[day].push({ startTime, endTime });
+          return acc;
+        },
+        {},
+      );
+
+      // Ordenar por día
+      const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const sortedGroupedAvailabilities = Object.keys(groupedAvailabilities)
+        .sort((a, b) => daysOrder.indexOf(a) - daysOrder.indexOf(b)) // Ordena según el índice en `daysOrder`
+        .reduce((acc, key) => {
+          acc[key] = groupedAvailabilities[key];
+          return acc;
+        }, {});
+
+      return sortedGroupedAvailabilities;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting time slot by professional');
+    }
   }
 }

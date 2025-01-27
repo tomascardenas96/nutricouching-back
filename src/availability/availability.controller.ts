@@ -27,4 +27,9 @@ export class AvailabilityController {
       date,
     );
   }
+
+  @Get('professional/:professionalId')
+  getTimeSlotByProfessional(@Param('professionalId') professionalId: string) {
+    return this.availabilityService.getTimeSlotByProfessional(professionalId);
+  }
 }
