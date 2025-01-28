@@ -252,6 +252,7 @@ export class AvailabilityService {
               day: slot,
               startTime: availability.slotStart,
               endTime: availability.slotEnd,
+              interval: availability.interval,
             });
           }
         });
@@ -259,11 +260,11 @@ export class AvailabilityService {
 
       // Agrupar y ordenar
       const groupedAvailabilities = listOfAvailabilities.reduce(
-        (acc, { day, startTime, endTime }) => {
+        (acc, { day, startTime, endTime, interval }) => {
           if (!acc[day]) {
             acc[day] = [];
           }
-          acc[day].push({ startTime, endTime });
+          acc[day].push({ startTime, endTime, interval });
           return acc;
         },
         {},
@@ -288,5 +289,50 @@ export class AvailabilityService {
       }
       throw new BadGatewayException('Error getting time slot by professional');
     }
+  }
+
+  /**
+   * Metodo para eliminar una franja horaria de un profesional en especifico
+   *
+   * @param startTime - Hora de inicio de la franja horaria
+   * @param professionalId - ID del profesional
+   * @param day - Fecha de la franja horaria
+   * @returns - Mensaje de confirmación
+   */
+  async deleteTimeSlot(startTime: string, professionalId: string, day: Days) {
+    try {
+      const professional =
+        await this.professionalService.findProfessionalById(professionalId);
+
+      const availabilities = await this.availabilityRepository.find({
+        where: { professional, slotStart: startTime, day },
+      });
+
+      if (availabilities.length === 0) {
+        throw new NotFoundException('Time slot not found');
+      }
+
+      return await this.availabilityRepository.remove(availabilities);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException('Error deleting time slot');
+    }
+  }
+
+  /**
+   * Agrega una nueva franja de horario de disponibilidad.
+   *
+   * @param professionalId - ID del profesional.
+   * @body - Datos de la nueva franja de horario (inicio, fin, intervalo, dia de la semana)
+   * @returns - Franja horaria creada
+   */
+  async addNewTimeSlot() {
+    try {
+    } catch (error) {}
   }
 }
