@@ -38,7 +38,7 @@ export class BookingController {
   }
 
   @Delete('delete/:bookingId')
-  async cancelBooking(@Param('bookingsId') bookingId: string) {
+  async cancelBooking(@Param('bookingId') bookingId: string) {
     return await this.bookingService.cancelBooking(bookingId);
   }
 }
