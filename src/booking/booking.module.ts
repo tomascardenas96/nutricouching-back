@@ -6,6 +6,7 @@ import { UserModule } from '../user/user.module';
 import { BookingController } from './booking.controller';
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
+import { Availability } from 'src/availability/entities/availability.entity';
 
 @Module({
   imports: [

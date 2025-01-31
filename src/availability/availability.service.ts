@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -39,6 +40,9 @@ export class AvailabilityService {
       const professional =
         await this.professionalService.findProfessionalById(professionalId);
 
+      const existentAvailabilities: Availability[] =
+        await this.availabilityRepository.find();
+
       // Recorremos el arreglo de disponibilidades (av) y generamos los horarios
       av.forEach((item) => {
         item.day.forEach((day) => {
@@ -55,19 +59,32 @@ export class AvailabilityService {
             // Si el tiempo de inicio excede el tiempo final, salimos del ciclo
             if (startTime > finalTime) break;
 
-            // Creamos la disponibilidad para cada intervalo
-            const availability: Availability =
-              this.availabilityRepository.create({
-                day,
-                startTime: start,
-                endTime: end,
-                interval: item.interval,
-                professional,
-                slotStart: item.startTime,
-                slotEnd: item.endTime,
-              });
+            const exists = existentAvailabilities.find(
+              (availability) =>
+                availability.startTime === start &&
+                availability.endTime === end &&
+                availability.day === day &&
+                availability.professional.professionalId ===
+                  professional.professionalId,
+            );
 
-            availabilities.push(availability);
+            if (!exists) {
+              // Creamos la disponibilidad para cada intervalo
+              const availability: Availability =
+                this.availabilityRepository.create({
+                  day,
+                  startTime: start,
+                  endTime: end,
+                  interval: item.interval,
+                  professional,
+                  slotStart: item.startTime,
+                  slotEnd: item.endTime,
+                });
+
+              availabilities.push(availability);
+            } else {
+              throw new BadRequestException('Availability already exists');
+            }
           }
         });
       });
@@ -78,7 +95,8 @@ export class AvailabilityService {
       // Manejamos errores específicos o generales
       if (
         error instanceof NotFoundException ||
-        error instanceof BadGatewayException
+        error instanceof BadGatewayException ||
+        error instanceof BadRequestException
       ) {
         throw error;
       }
@@ -259,16 +277,16 @@ export class AvailabilityService {
       });
 
       // Agrupar y ordenar
-      const groupedAvailabilities = listOfAvailabilities.reduce(
-        (acc, { day, startTime, endTime, interval }) => {
-          if (!acc[day]) {
-            acc[day] = [];
-          }
-          acc[day].push({ startTime, endTime, interval });
-          return acc;
-        },
-        {},
-      );
+      const groupedAvailabilities = listOfAvailabilities.reduce((acc, curr) => {
+        const { day, startTime, endTime, interval } = curr;
+
+        if (!acc[day]) {
+          acc[day] = [];
+        }
+
+        acc[day].push({ startTime, endTime, interval });
+        return acc;
+      }, {});
 
       // Ordenar por día
       const daysOrder = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -297,7 +315,7 @@ export class AvailabilityService {
    * @param startTime - Hora de inicio de la franja horaria
    * @param professionalId - ID del profesional
    * @param day - Fecha de la franja horaria
-   * @returns - Mensaje de confirmación
+   * @returns - Arreglo con los horarios eliminados
    */
   async deleteTimeSlot(startTime: string, professionalId: string, day: Days) {
     try {
@@ -322,17 +340,5 @@ export class AvailabilityService {
       }
       throw new BadGatewayException('Error deleting time slot');
     }
-  }
-
-  /**
-   * Agrega una nueva franja de horario de disponibilidad.
-   *
-   * @param professionalId - ID del profesional.
-   * @body - Datos de la nueva franja de horario (inicio, fin, intervalo, dia de la semana)
-   * @returns - Franja horaria creada
-   */
-  async addNewTimeSlot() {
-    try {
-    } catch (error) {}
   }
 }

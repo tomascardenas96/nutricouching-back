@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { TokenGuard } from 'src/auth/guard/token.guard';
@@ -26,5 +35,10 @@ export class BookingController {
     @Query('professionalId') professionalId: string,
   ) {
     return this.bookingService.isDateAvailable(new Date(date), professionalId);
+  }
+
+  @Delete('delete/:bookingId')
+  async cancelBooking(@Param('bookingsId') bookingId: string) {
+    return await this.bookingService.cancelBooking(bookingId);
   }
 }
