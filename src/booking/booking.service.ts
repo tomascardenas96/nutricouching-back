@@ -13,6 +13,7 @@ import { DeleteResult, Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
 import { Availability } from 'src/availability/entities/availability.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class BookingService {
@@ -151,6 +152,40 @@ export class BookingService {
         throw error;
       }
       throw new BadGatewayException('Error getting bookings by professional');
+    }
+  }
+
+  async getBookingsByUser(userId: string) {
+    try {
+      const bookings = await this.bookingRepository.find({
+        where: { user: { userId } },
+        relations: ['user'],
+      });
+
+      const noRepeatedDates = new Set();
+
+      bookings.forEach((booking) => {
+        noRepeatedDates.add(booking.date);
+      });
+
+      const splitedBookings: Record<string, any[]> = {};
+
+      noRepeatedDates.forEach((date) => {
+        const filterBookingsByDay = bookings.filter((booking) => {
+          return booking.date === date;
+        });
+
+        splitedBookings[date.toString()] = filterBookingsByDay;
+      });
+
+      const sortedDate = this.sortScheduleByDate(splitedBookings);
+
+      return sortedDate;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Error getting bookings by user');
     }
   }
 

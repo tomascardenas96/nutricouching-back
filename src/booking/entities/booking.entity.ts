@@ -40,6 +40,7 @@ export class Booking {
 
   @ManyToOne(() => Professional, (professional) => professional.booking, {
     onDelete: 'CASCADE',
+    eager: true,
   })
   @JoinColumn({ name: 'professional' })
   professional: Professional;
