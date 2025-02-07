@@ -2,6 +2,7 @@ import { Booking } from 'src/booking/entities/booking.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Plan } from 'src/common/enum/plan.enum';
 import { Role } from 'src/common/enum/role.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
 import {
   Column,
@@ -64,4 +65,9 @@ export class User {
   @OneToOne(() => Cart, (cart) => cart.user, { eager: true })
   @JoinColumn({ name: 'cart' })
   cart: Cart;
+
+  @OneToMany(() => Notification, (notification) => notification.user, {
+    onDelete: 'CASCADE',
+  })
+  notifications: Notification[];
 }

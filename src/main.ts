@@ -18,6 +18,11 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+    origin: '*', // Cambia esto por la URL de tu frontend
+    credentials: true,
+  });
+
   await app.listen(3010);
 }
 bootstrap();

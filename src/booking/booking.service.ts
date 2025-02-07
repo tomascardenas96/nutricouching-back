@@ -14,6 +14,8 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
 import { Availability } from 'src/availability/entities/availability.entity';
 import { User } from 'src/user/entity/user.entity';
+import { NotificationService } from 'src/notification/notification.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 
 @Injectable()
 export class BookingService {
@@ -23,6 +25,8 @@ export class BookingService {
     private readonly serviceService: ServiceService,
     private readonly userService: UserService,
     private readonly professionalService: ProfessionalService,
+    private readonly notificationService: NotificationService,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   async create(createBookingDto: CreateBookingDto): Promise<Booking> {
@@ -227,7 +231,35 @@ export class BookingService {
     try {
       const booking: Booking = await this.getBookingById(bookingId);
 
+      const userId = booking.user.userId;
+
       await this.bookingRepository.delete(booking);
+
+      const dayNumber = new Date(booking.date + 'T00:00:00').getDate();
+      const monthNumber = new Date(booking.date + 'T00:00:00').getMonth();
+
+      const months = [
+        'Enero',
+        'Febrero',
+        'Marzo',
+        'Abril',
+        'Mayo',
+        'Junio',
+        'Julio',
+        'Agosto',
+        'Septiembre',
+        'Octubre',
+        'Noviembre',
+        'Diciembre',
+      ];
+
+      const notification = await this.notificationService.createNotification(
+        userId,
+        `Tu turno con el profesional ${booking.professional.fullname} para el dia ${dayNumber} de ${months[monthNumber]} a las ${booking.startTime.substring(0, 5)}hs ha sido cancelado `,
+      );
+
+      // Enviamos la notificación en tiempo real
+      this.socketGateway.notifyUserDeletedBooking(userId, notification);
 
       return {
         message: 'Booking deleted succesfully',

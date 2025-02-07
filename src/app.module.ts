@@ -19,6 +19,8 @@ import { PaymentModule } from './payment/payment.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { SpecialtyModule } from './specialty/specialty.module';
 import { IngredientModule } from './ingredient/ingredient.module';
+import { SocketModule } from './socket/socket.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { IngredientModule } from './ingredient/ingredient.module';
     }),
     SpecialtyModule,
     IngredientModule,
+    SocketModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
