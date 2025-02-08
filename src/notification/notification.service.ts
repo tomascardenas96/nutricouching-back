@@ -3,12 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
-import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class NotificationService {
@@ -49,11 +47,17 @@ export class NotificationService {
     }
   }
 
+  /**
+   * Metodo para obtener las notificaciones de un usuario en especifico
+   *
+   * @param userId - El ID del usuario
+   * @returns - Lista con todas las notificaciones vinculadas al usuario
+   */
   async getUserNotifications(userId: string): Promise<Notification[]> {
     try {
       return this.notificationRepository.find({
         where: { user: { userId } },
-        order: { createdAt: 'ASC' },
+        order: { createdAt: 'DESC' },
       });
     } catch (error) {
       throw new BadGatewayException('Error getting notifications by user');
