@@ -36,12 +36,30 @@ export class SpecialtyController {
     return this.specialtyService.getSpecialtiesByService(serviceId);
   }
 
+  @Get('professional/:professionalId')
+  getSpecialtiesByProfessional(
+    @Param('professionalId') professionalId: string,
+  ) {
+    return this.specialtyService.getSpecialtiesByProfessional(professionalId);
+  }
+
   @Post('/list')
   verifyAndCreateSpecialtiesByArray(
     @Body() createSpecialtyDto: CreateSpecialtyDto[],
   ) {
     return this.specialtyService.verifyAndCreateSpecialtiesByArray(
       createSpecialtyDto,
+    );
+  }
+
+  @Post(':specialtyId/professional/:professionalId')
+  assignSpecialtyToAProfessional(
+    @Param('specialtyId') specialtyId: string,
+    @Param('professionalId') professionalId: string,
+  ) {
+    return this.specialtyService.assignSpecialtyToAProfessional(
+      professionalId,
+      specialtyId,
     );
   }
 

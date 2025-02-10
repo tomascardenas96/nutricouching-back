@@ -11,15 +11,24 @@ import { Specialty } from './entities/specialty.entity';
 import { ILike, Repository } from 'typeorm';
 import { ServiceService } from 'src/service/service.service';
 import { Service } from 'src/service/entities/service.entity';
+import { Professional } from 'src/professional/entities/professional.entity';
 
 @Injectable()
 export class SpecialtyService {
   constructor(
     @InjectRepository(Specialty)
     private readonly specialtyRepository: Repository<Specialty>,
+    @InjectRepository(Professional)
+    private readonly professionalRepository: Repository<Professional>,
     private readonly serviceService: ServiceService,
   ) {}
 
+  /**
+   * Metodo para crear una nueva especialidad
+   *
+   * @param CreateSpecialtyDto - Un objeto del tipo CreateSpecialtyDto (name, serviceId)
+   * @returns - El objeto guardado
+   */
   async createSpecialty({
     name,
     serviceId,
@@ -111,6 +120,27 @@ export class SpecialtyService {
     }
   }
 
+  /**
+   * Metodo que devuelve todas las especialidades de un profesional
+   *
+   * @param professionalId - ID del profesional
+   * @returns - Lista con las especialidades de un profesional
+   */
+  async getSpecialtiesByProfessional(professionalId: string) {
+    try {
+      const professional = await this.professionalRepository.findOne({
+        where: { professionalId },
+        relations: ['specialty'],
+      });
+
+      return professional.specialty;
+    } catch (error) {
+      throw new BadGatewayException(
+        'Error getting specialties by professional',
+      );
+    }
+  }
+
   async verifyAndCreateSpecialtiesByArray(
     createSpecialtyDto: CreateSpecialtyDto[],
   ): Promise<Specialty[]> {
@@ -143,8 +173,39 @@ export class SpecialtyService {
     }
   }
 
-  async assignSpecialtyToAProfessional() {
+  /**
+   * Metodo para asignar una especialidad a un profesional
+   *
+   * @param professionalId - ID del profesional
+   * @param specialtyId - ID de la especialidad a asignar
+   * @returns - Profesional con las especialidades actualizadas
+   */
+  async assignSpecialtyToAProfessional(
+    professionalId: string,
+    specialtyId: string,
+  ) {
     try {
-    } catch (error) {}
+      const activeProfessional = await this.professionalRepository.findOne({
+        where: { professionalId },
+      });
+
+      if (!activeProfessional) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      const specialty = await this.getSpecialtyById(specialtyId);
+
+      activeProfessional.specialty.push(specialty);
+
+      return await this.professionalRepository.save(activeProfessional);
+    } catch (error) {
+      if (
+        error instanceof BadGatewayException ||
+        error instanceof NotFoundException
+      )
+        throw new BadGatewayException(
+          'Error assigning specialty to professional',
+        );
+    }
   }
 }
