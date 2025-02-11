@@ -85,10 +85,6 @@ export class SpecialtyService {
     return `This action updates a #${id} specialty`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} specialty`;
-  }
-
   async getSpecialtyById(specialtyId: string): Promise<Specialty> {
     try {
       return this.specialtyRepository.findOne({ where: { specialtyId } });
@@ -206,6 +202,66 @@ export class SpecialtyService {
         throw new BadGatewayException(
           'Error assigning specialty to professional',
         );
+    }
+  }
+
+  /**
+   * Metodo para desvincular una especialidad de un profesional
+   *
+   * @param professionalId
+   * @param specialtyId
+   */
+  async unassignSpecialtyOfProfessional(
+    professionalId: string,
+    specialtyId: string,
+  ) {
+    try {
+      const activeProfessional = await this.professionalRepository.findOne({
+        where: { professionalId },
+      });
+
+      if (!activeProfessional) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      const filteredSpecialties = activeProfessional.specialty.filter(
+        (specialty) => specialty.specialtyId !== specialtyId,
+      );
+
+      activeProfessional.specialty = filteredSpecialties;
+
+      return await this.professionalRepository.save(activeProfessional);
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      )
+        throw new BadGatewayException(
+          'Error unlinking specialty of a professional ',
+        );
+    }
+  }
+
+  /**
+   * Metodo para eliminar una especialidad
+   *
+   * @param specialtyId - ID de la especialidad
+   * @returns - Mensaje exito seguido del id de la especialidad eliminada o un mensaje que ninguna fila fue afectada
+   */
+  async deleteSpecialty(specialtyId: string) {
+    try {
+      const deletedRow = await this.specialtyRepository.delete(specialtyId);
+
+      if (deletedRow.affected === 0) {
+        return deletedRow;
+      }
+
+      return {
+        message: 'Specialty deleted',
+        id: specialtyId,
+      };
+    } catch (error) {
+      throw new BadGatewayException('Error deleting specialty');
     }
   }
 }

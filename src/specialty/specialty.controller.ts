@@ -63,6 +63,17 @@ export class SpecialtyController {
     );
   }
 
+  @Patch('unlink/:specialtyId/professional/:professionalId')
+  unassignSpecialtyOfProfessional(
+    @Param('specialtyId') specialtyId: string,
+    @Param('professionalId') professionalId: string,
+  ) {
+    return this.specialtyService.unassignSpecialtyOfProfessional(
+      professionalId,
+      specialtyId,
+    );
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -71,8 +82,8 @@ export class SpecialtyController {
     return this.specialtyService.update(+id, updateSpecialtyDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.specialtyService.remove(+id);
+  @Delete(':specialtyId')
+  remove(@Param('specialtyId') specialtyId: string) {
+    return this.specialtyService.deleteSpecialty(specialtyId);
   }
 }

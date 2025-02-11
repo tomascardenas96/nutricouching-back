@@ -34,7 +34,7 @@ export class BookingController {
     return this.bookingService.getBookingsByUser(userId);
   }
 
-  @Get('available') 
+  @Get('available')
   async isDateAvailable(
     @Query('date') date: string,
     @Query('professionalId') professionalId: string,
