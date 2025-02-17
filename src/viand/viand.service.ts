@@ -142,4 +142,25 @@ export class ViandService {
       throw new BadGatewayException('Error getting viand by id');
     }
   }
+
+  async subtractStockAfterPurchase(viands: { id: string; quantity: number }[]) {
+    try {
+      const viandsInCart: Viand[] = [];
+
+      for (const viand of viands) {
+        const foundViand = await this.getViandById(viand.id);
+        foundViand.stock -= Number(viand.quantity);
+
+        viandsInCart.push(foundViand);
+      }
+
+      if (viandsInCart.length === 0) {
+        return;
+      }
+
+      return await this.viandRepository.save(viandsInCart);
+    } catch (error) {
+      throw new BadGatewayException('Error subtracting stock');
+    }
+  }
 }

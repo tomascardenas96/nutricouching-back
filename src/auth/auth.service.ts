@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 import * as bcryptjs from 'bcryptjs';
 import { User } from 'src/user/entity/user.entity';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class AuthService {
@@ -19,16 +20,20 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly cartService: CartService,
   ) {}
 
   async register(registerDto: RegisterDto) {
     try {
       const hashedPassword = await bcryptjs.hash(registerDto.password, 10);
 
-      await this.userService.createUser({
+      const user = await this.userService.createUser({
         ...registerDto,
         password: hashedPassword,
       });
+
+      // Creamos un carrito para este nuevo usuario
+      await this.cartService.createCart(user);
 
       const SECRET_KEY: string = process.env.SECRET_KEY;
 
@@ -128,7 +133,10 @@ export class AuthService {
       ) {
         throw error;
       }
-      throw new BadGatewayException('Error trying to login user');
+      throw new BadGatewayException(
+        'Error trying to login user',
+        error.message,
+      );
     }
   }
 }

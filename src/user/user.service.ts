@@ -34,26 +34,26 @@ export class UserService {
       const existentEmail: User = await this.userRepository.findOne({
         where: { email: user.email },
       });
-      if (existentEmail) {
+      if (!!existentEmail) {
         throw new BadRequestException('Email already exists');
       }
 
       const existentUserName: User = await this.userRepository.findOne({
         where: { username: user.username },
       });
-      if (existentUserName) {
+
+      if (!!existentUserName) {
         throw new BadRequestException('Username already exists');
       }
 
-      //Creamos un carrito automaticamente
-      const cart: Cart = await this.cartService.createCart();
-
-      //Y lo asignamos al nuevo usuario
-      const newUser: User = this.userRepository.create({ ...user, cart });
+      const newUser: User = this.userRepository.create({ ...user });
 
       return this.userRepository.save(newUser);
     } catch (error) {
-      if (error instanceof BadRequestException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof BadGatewayException
+      ) {
         throw error;
       }
       throw new BadGatewayException('Error creating a new user');
@@ -74,7 +74,8 @@ export class UserService {
   async findUserById(userId: string): Promise<User> {
     try {
       const user = await this.userRepository.findOne({
-        where: { userId },
+        where: { userId},
+        relations: ['cart']
       });
 
       if (!user) {

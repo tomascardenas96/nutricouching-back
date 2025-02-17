@@ -62,8 +62,7 @@ export class User {
   @JoinColumn({ name: 'professional' })
   professional: Professional;
 
-  @OneToOne(() => Cart, (cart) => cart.user, { eager: true })
-  @JoinColumn({ name: 'cart' })
+  @OneToMany(() => Cart, (cart) => cart.user)
   cart: Cart;
 
   @OneToMany(() => Notification, (notification) => notification.user, {

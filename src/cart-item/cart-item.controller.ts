@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { CartItemService } from './cart-item.service';
 import { AddProductsToCartDto } from './dto/AddProductsToCart.dto';
 import { AddElementLoggedInDto } from './dto/AddElementLoggedIn.dto';
@@ -40,5 +48,10 @@ export class CartItemController {
       elementId,
       addSubtractUnityDto,
     );
+  }
+
+  @Delete(':cartId')
+  emptyCart(@Param('cartId') cartId: string) {
+    return this.cartItemService.emptyCart(cartId);
   }
 }

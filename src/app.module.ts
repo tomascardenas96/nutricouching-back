@@ -21,6 +21,9 @@ import { SpecialtyModule } from './specialty/specialty.module';
 import { IngredientModule } from './ingredient/ingredient.module';
 import { SocketModule } from './socket/socket.module';
 import { NotificationModule } from './notification/notification.module';
+import { MercadopagoModule } from './mercadopago/mercadopago.module';
+import { WebhookModule } from './webhook/webhook.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -55,6 +58,9 @@ import { NotificationModule } from './notification/notification.module';
     IngredientModule,
     SocketModule,
     NotificationModule,
+    MercadopagoModule,
+    WebhookModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

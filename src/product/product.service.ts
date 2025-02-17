@@ -133,4 +133,29 @@ export class ProductService {
       throw new BadGatewayException('Error getting product by id');
     }
   }
+
+  async subtractStockAfterPurchase(
+    products: { id: string; quantity: number }[],
+  ) {
+    try {
+      const productsInCart: Product[] = [];
+
+      for (const product of products) {
+        const foundProduct = await this.getProductById(product.id);
+        foundProduct.stock -= Number(product.quantity);
+
+        productsInCart.push(foundProduct);
+      }
+
+      console.log(productsInCart);
+
+      if (products.length === 0) {
+        return;
+      }
+
+      return await this.productRepository.save(productsInCart);
+    } catch (error) {
+      throw new BadGatewayException('Error subtracting stock');
+    }
+  }
 }

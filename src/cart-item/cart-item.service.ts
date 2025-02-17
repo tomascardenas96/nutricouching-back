@@ -204,4 +204,18 @@ export class CartItemService {
       throw new BadGatewayException('Error adding or subtracting unity');
     }
   }
+
+  /**
+   * Metodo utilizado para vaciar el carrito del usuario activo
+   *
+   * @param cartId - ID del carrito activo
+   * @returns - Cantidad de filas afectadas
+   */
+  async emptyCart(cartId: string) {
+    try {
+      return await this.cartItemRepository.delete({ cart: { cartId } });
+    } catch (error) {
+      throw new BadGatewayException('Error emptying cart');
+    }
+  }
 }
