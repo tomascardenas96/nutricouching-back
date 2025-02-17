@@ -135,11 +135,18 @@ src/
 
 ### 7) Cuentas de prueba (Mercado Pago)
 
-#### Comprador:
+#### Comprador 1:
 
 ```bash
 User: TESTUSER1643151276
 Password: C7X0yRGIyB
+```
+
+#### Comprador 2:
+
+```bash
+User: TESTUSER243306729
+Password: VsQnw9pUC0
 ```
 
 #### Vendedor:
