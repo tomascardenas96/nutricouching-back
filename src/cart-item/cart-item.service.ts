@@ -213,6 +213,7 @@ export class CartItemService {
    */
   async emptyCart(cartId: string) {
     try {
+      console.log(cartId);
       return await this.cartItemRepository.delete({ cart: { cartId } });
     } catch (error) {
       throw new BadGatewayException('Error emptying cart');

@@ -227,6 +227,7 @@ export class BookingService {
    */
   async cancelBooking(
     bookingId: string,
+    activeUserId: string,
   ): Promise<{ message: string; id: string }> {
     try {
       const booking: Booking = await this.getBookingById(bookingId);
@@ -253,13 +254,16 @@ export class BookingService {
         'Diciembre',
       ];
 
-      const notification = await this.notificationService.createNotification(
-        userId,
-        `Tu turno con el profesional ${booking.professional.fullname} para el dia ${dayNumber} de ${months[monthNumber]} a las ${booking.startTime.substring(0, 5)}hs ha sido cancelado `,
-      );
+      // Si el usuario que cancela no coincide con el usuario que saco el turno, enviarle notificacion.
+      if (activeUserId !== booking.user.userId) {
+        const notification = await this.notificationService.createNotification(
+          userId,
+          `Tu turno con el profesional ${booking.professional.fullname} para el dia ${dayNumber} de ${months[monthNumber]} a las ${booking.startTime.substring(0, 5)}hs ha sido cancelado `,
+        );
 
-      // Enviamos la notificación en tiempo real
-      this.socketGateway.notifyUserDeletedBooking(userId, notification);
+        // Enviamos la notificación en tiempo real
+        this.socketGateway.notifyUserDeletedBooking(userId, notification);
+      }
 
       return {
         message: 'Booking deleted succesfully',

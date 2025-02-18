@@ -53,8 +53,11 @@ export class ClientOrderService {
     }
   }
 
-  async markOrderAsConfirmed() {
+  async markOrderAsConfirmed(clientOrder: ClientOrder) {
     try {
+      clientOrder.status = OrderStatus.CONFIRMED;
+
+      return this.clientOrderRepository.save(clientOrder);
     } catch (error) {
       throw new BadGatewayException('Error marking order as confirmed');
     }

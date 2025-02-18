@@ -40,7 +40,7 @@ export class CartService {
   async getCartById(cartId: string): Promise<Cart> {
     try {
       const cart: Cart = await this.cartRepository.findOne({
-        where: { cartId },
+        where: { cartId, isActive: true },
       });
 
       if (!cart) {
@@ -63,6 +63,17 @@ export class CartService {
       });
     } catch (error) {
       throw new BadGatewayException('Error getting active cart');
+    }
+  }
+
+  async disableCart(cartId: string): Promise<void> {
+    try {
+      const cart = await this.getCartById(cartId);
+      cart.isActive = false;
+
+      await this.cartRepository.save(cart);
+    } catch (error) {
+      throw new BadGatewayException('Error disabling cart');
     }
   }
 }

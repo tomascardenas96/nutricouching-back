@@ -149,16 +149,29 @@ export class ViandService {
 
       for (const viand of viands) {
         const foundViand = await this.getViandById(viand.id);
+
+        if (!foundViand) {
+          throw new BadGatewayException(
+            `Vianda con ID ${viand.id} no encontrada`,
+          );
+        }
+
         foundViand.stock -= Number(viand.quantity);
+
+        if (foundViand.stock < 0) {
+          throw new BadGatewayException(
+            `Stock insuficiente para la vianda ${viand.id}`,
+          );
+        }
 
         viandsInCart.push(foundViand);
       }
 
-      if (viandsInCart.length === 0) {
-        return;
+      if (!viandsInCart.length) {
+        return [];
       }
 
-      return await this.viandRepository.save(viandsInCart);
+      await this.viandRepository.save(viandsInCart);
     } catch (error) {
       throw new BadGatewayException('Error subtracting stock');
     }

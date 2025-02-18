@@ -6,6 +6,7 @@ import { ViandModule } from 'src/viand/viand.module';
 import { ProductModule } from 'src/product/product.module';
 import { PaymentModule } from 'src/payment/payment.module';
 import { ClientOrderModule } from 'src/client-order/client-order.module';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ClientOrderModule } from 'src/client-order/client-order.module';
     ProductModule,
     PaymentModule,
     ClientOrderModule,
+    CartModule,
   ],
   controllers: [WebhookController],
   providers: [WebhookService],
