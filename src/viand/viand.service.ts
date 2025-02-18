@@ -143,35 +143,30 @@ export class ViandService {
     }
   }
 
+  /**
+   * Restar stock despues de la compra
+   *
+   * @param viands - Lista de productos y la cantidad comprada
+   */
   async subtractStockAfterPurchase(viands: { id: string; quantity: number }[]) {
     try {
-      const viandsInCart: Viand[] = [];
+      const updatedViands: Viand[] = [];
 
       for (const viand of viands) {
-        const foundViand = await this.getViandById(viand.id);
+        const foundViand = await this.viandRepository.findOne({
+          where: { viandId: viand.id },
+        });
 
-        if (!foundViand) {
-          throw new BadGatewayException(
-            `Vianda con ID ${viand.id} no encontrada`,
-          );
+        if (foundViand) {
+          foundViand.stock -= viand.quantity;
+
+          updatedViands.push(foundViand);
         }
-
-        foundViand.stock -= Number(viand.quantity);
-
-        if (foundViand.stock < 0) {
-          throw new BadGatewayException(
-            `Stock insuficiente para la vianda ${viand.id}`,
-          );
-        }
-
-        viandsInCart.push(foundViand);
       }
 
-      if (!viandsInCart.length) {
-        return [];
+      if (updatedViands.length) {
+        await this.viandRepository.save(updatedViands);
       }
-
-      await this.viandRepository.save(viandsInCart);
     } catch (error) {
       throw new BadGatewayException('Error subtracting stock');
     }

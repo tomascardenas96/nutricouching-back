@@ -41,6 +41,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit(`deletedBookingNotify`, { ...notification });
   }
 
+  notifyUserSuccessfulPurchase(userId: string, notification: Notification) {
+    this.server
+      .to(`user_${userId}`)
+      .emit(`successfullPurchaseNotify`, { ...notification });
+  }
+
   handleDisconnect(client: Socket) {
     console.log(`client disconnected: `, client.id);
   }

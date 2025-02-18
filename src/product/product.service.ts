@@ -134,10 +134,32 @@ export class ProductService {
     }
   }
 
+  /**
+   * Restar stock despues de la compra
+   *
+   * @param products - Lista de productos y la cantidad comprada
+   */
   async subtractStockAfterPurchase(
     products: { id: string; quantity: number }[],
   ) {
     try {
+      const updatedProducts: Product[] = [];
+
+      for (const product of products) {
+        const foundProduct = await this.productRepository.findOne({
+          where: { productId: product.id },
+        });
+
+        if (foundProduct) {
+          foundProduct.stock -= product.quantity;
+
+          updatedProducts.push(foundProduct);
+        }
+      }
+
+      if (updatedProducts.length) {
+        await this.productRepository.save(updatedProducts);
+      }
     } catch (error) {
       throw new BadGatewayException('Error subtracting stock');
     }

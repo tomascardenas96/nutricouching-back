@@ -2,8 +2,10 @@ import { Injectable, BadGatewayException } from '@nestjs/common';
 import { CartItemService } from 'src/cart-item/cart-item.service';
 import { CartService } from 'src/cart/cart.service';
 import { ClientOrderService } from 'src/client-order/client-order.service';
+import { NotificationService } from 'src/notification/notification.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { ProductService } from 'src/product/product.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 import { ViandService } from 'src/viand/viand.service';
 
 @Injectable()
@@ -15,6 +17,8 @@ export class WebhookService {
     private readonly paymentService: PaymentService,
     private readonly clientOrderService: ClientOrderService,
     private readonly cartService: CartService,
+    private readonly notificationService: NotificationService,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   async handleWebHook(webHookData: any) {
@@ -40,6 +44,7 @@ export class WebhookService {
          * - Inhabilitar el carrito activo. ✅
          * - Crear un carrito activo nuevo. ✅
          * - Cambiar el estado de la orden a CONFIRMED. ✅
+         * - Generar la factura.
          *
          * Al ser rechazado el pago:
          * - Enviar notificacion flotante al usuario con el pago rechazado.
@@ -57,16 +62,17 @@ export class WebhookService {
             };
           });
 
-          // await this.productService.subtractStockAfterPurchase(items);
-          // await this.viandService.subtractStockAfterPurchase(items);
+          // Restamos stock de los elementos comprados (viandas/productos).
+          await this.productService.subtractStockAfterPurchase(items);
+          await this.viandService.subtractStockAfterPurchase(items);
 
-          // Obtenemos la orden
+          // Obtenemos la orden.
           const clientOrder =
             await this.clientOrderService.getPendingClientOrderByCart(
               activeCartId,
             );
 
-          // Guardamos el pago en la DB (para que no se ejecute la operacion varias veces)
+          // Guardamos el pago en la DB (para que no se ejecute la operacion varias veces).
           await this.paymentService.markPaymentAsProcessed({
             paymentId: paymentDetails.external_reference,
             clientOrder,
@@ -75,15 +81,27 @@ export class WebhookService {
           // Marcamos la orden como confirmada.
           await this.clientOrderService.markOrderAsConfirmed(clientOrder);
 
-          // Vaciamos el carrito
+          // Vaciamos el carrito.
           await this.cartItemService.emptyCart(activeCartId);
 
-          // Creamos un nuevo carrito para el usuario activo
+          // Creamos un nuevo carrito para el usuario activo.
           const cart = await this.cartService.getCartById(activeCartId);
           await this.cartService.createCart(cart.user);
 
           // Deshabilitamos el carrito.
           await this.cartService.disableCart(activeCartId);
+
+          // Creamos una notificacion y la enviamos al usuario en tiempo real.
+          const notification =
+            await this.notificationService.createNotification(
+              cart.user.userId,
+              'Tu compra ha sido exitosa!',
+            );
+
+          this.socketGateway.notifyUserSuccessfulPurchase(
+            cart.user.userId,
+            notification,
+          );
         } else if (paymentDetails.status === 'rejected') {
           console.log('rechazado');
         }
