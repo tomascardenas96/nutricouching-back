@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Body } from '@nestjs/common';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -13,5 +13,10 @@ export class UserController {
   @Get('filter')
   getNonProfessionalsUsersByEmail(@Query('email') email: string) {
     return this.userService.getNonProfessionalsUsersByEmail(email);
+  }
+
+  @Get('email')
+  email(@Body() email: string) {
+    return this.userService.findUserByEmail(email);
   }
 }

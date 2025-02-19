@@ -21,11 +21,28 @@ export class MailService {
 
   async sendConfirmationEmail(email: string, token: string) {
     const mailOptions = {
-      from: 'Nutricoaching - <tomicardenas96@gmail.com>',
+      from: 'Nutricoaching - <nutricoaching@gmail.com>',
       to: email,
       subject: 'Confirma tu cuenta',
       text: `Por favor confirma tu cuenta utilizando el siguiente enlace: http://localhost:3150/auth/confirm?token=${token}`,
       html: `<p>Por favor confirma tu cuenta haciendo clic en el siguiente enlace:</p><a href="http://localhost:3150/auth/confirm?token=${token}">Confirmar cuenta</a>`,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error sending email:', error.message);
+      return new Error('Error sending confirmation email');
+    }
+  }
+
+  async sendResetPasswordEmail(email: string, token: string) {
+    const mailOptions = {
+      from: 'Nutricoaching - <nutricoaching@gmail.com>',
+      to: email,
+      subject: 'Reestablecer contraseña',
+      html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+      <a href="${token}">Restablecer contraseña</a>`,
     };
 
     try {

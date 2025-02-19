@@ -6,6 +6,7 @@ import {
   Get,
   UseGuards,
   Request,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -35,5 +36,15 @@ export class AuthController {
   @UseGuards(TokenGuard)
   geActivetUser(@Request() request: any) {
     return request.user;
+  }
+
+  @Post('forgot-password/:email')
+  forgotPassword(@Param('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() body: { token: string; newPassword: string }) {
+    return this.authService.resetPassword(body);
   }
 }

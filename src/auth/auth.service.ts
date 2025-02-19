@@ -139,4 +139,68 @@ export class AuthService {
       );
     }
   }
+
+  /**
+   * Envia un mail al usuario para reestablecer la contraseña
+   *
+   * @param email - Email del usuario a reestablecer la contraseña
+   * @returns - Mensaje de exito
+   */
+  async forgotPassword(email: string) {
+    try {
+      const user: User = await this.userService.findUserByEmail(email);
+
+      const resetToken: string = await this.jwtService.signAsync(
+        { id: user.userId, email: user.email },
+        { secret: process.env.RESET_SECRET_KEY, expiresIn: '1h' },
+      );
+
+      const resetLink = `${process.env.FRONTEND_HOST}/reset-password?token=${resetToken}`;
+
+      await this.mailService.sendResetPasswordEmail(email, resetLink);
+
+      return { message: 'Correo enviado, revisa tu bandeja de entrada' };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException('Error sending link for reset password');
+    }
+  }
+
+  /**
+   * Reestablecer contraseña desde el link
+   *
+   * @param body - Token y contraseña nueva
+   * @returns - Mensaje de exito
+   */
+  async resetPassword(body: { token: string; newPassword: string }) {
+    try {
+      // Verificar el token
+      const payload = await this.jwtService.verifyAsync(body.token, {
+        secret: process.env.RESET_SECRET_KEY,
+      });
+
+      const user = await this.userService.findUserById(payload.id);
+
+      const hashedPassword = await bcryptjs.hash(body.newPassword, 10);
+
+      await this.userService.updatePassword(user.userId, hashedPassword);
+
+      return { message: 'Contraseña actualizada correctamente' };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException
+      ) {
+        throw error;
+      }
+      throw new BadGatewayException(
+        'Error reseting password, token invalid or expired',
+      );
+    }
+  }
 }
