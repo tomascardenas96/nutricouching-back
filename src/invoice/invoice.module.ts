@@ -9,5 +9,6 @@ import { ClientOrderModule } from 'src/client-order/client-order.module';
   imports: [TypeOrmModule.forFeature([Invoice]), ClientOrderModule],
   controllers: [InvoiceController],
   providers: [InvoiceService],
+  exports: [InvoiceService],
 })
 export class InvoiceModule {}

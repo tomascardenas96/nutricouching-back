@@ -13,6 +13,13 @@ export class InvoiceService {
     private readonly clientOrderService: ClientOrderService,
   ) {}
 
+  /**
+   * Genera una factura tomando un snapshot de la informacion de los elementos comprados.
+   *
+   * @param orderId - ID de la orden
+   * @param generateInvoiceDto - Informacion de los productos.
+   * @returns - Factura generada
+   */
   async generateInvoice(
     orderId: string,
     generateInvoiceDto: GenerateInvoiceDto[],
@@ -26,7 +33,7 @@ export class InvoiceService {
       for (const item of generateInvoiceDto) {
         const newInvoice = this.invoiceRepository.create({
           order: clientOrder,
-          itemId: item.itemId,
+          itemId: item.id,
           name: item.name,
           quantity: item.quantity,
           price: item.price,

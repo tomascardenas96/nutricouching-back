@@ -1,7 +1,13 @@
-import { Injectable, BadGatewayException } from '@nestjs/common';
+import {
+  Injectable,
+  BadGatewayException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CartItemService } from 'src/cart-item/cart-item.service';
 import { CartService } from 'src/cart/cart.service';
 import { ClientOrderService } from 'src/client-order/client-order.service';
+import { InvoiceService } from 'src/invoice/invoice.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { ProductService } from 'src/product/product.service';
@@ -19,6 +25,7 @@ export class WebhookService {
     private readonly cartService: CartService,
     private readonly notificationService: NotificationService,
     private readonly socketGateway: SocketGateway,
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   async handleWebHook(webHookData: any) {
@@ -39,38 +46,59 @@ export class WebhookService {
         /**
          * Al ser aceptado el pago:
          * - Vaciar el carrito de compras. ✅
-         * - Enviar notificacion flotante al usuario.
+         * - Enviar notificacion flotante al usuario. ✅
          * - Restar stock de los productos. ✅
          * - Inhabilitar el carrito activo. ✅
          * - Crear un carrito activo nuevo. ✅
          * - Cambiar el estado de la orden a CONFIRMED. ✅
-         * - Generar la factura.
+         * - Generar la factura. ✅
          *
          * Al ser rechazado el pago:
-         * - Enviar notificacion flotante al usuario con el pago rechazado.
+         * - Enviar notificacion flotante al usuario con el pago rechazado. ✅
          *
          * Sea rechazado o aceptado:
-         * - Enviar notificacion al usuario.
-         * - Marcar el pago como rechazado/aceptado para que no se repita la operacion.
+         * - Enviar notificacion al usuario. ✅
+         * - Marcar el pago como rechazado/aceptado para que no se repita la operacion. ✅
          */
 
         if (paymentDetails.status === 'approved') {
-          const items = paymentDetails.additional_info.items.map((item) => {
-            return {
-              id: item.id,
-              quantity: item.quantity,
-            };
-          });
+          const itemsAndQuantity = paymentDetails.additional_info.items.map(
+            (item: any) => {
+              return {
+                id: item.id,
+                quantity: item.quantity,
+              };
+            },
+          );
 
           // Restamos stock de los elementos comprados (viandas/productos).
-          await this.productService.subtractStockAfterPurchase(items);
-          await this.viandService.subtractStockAfterPurchase(items);
+          await this.productService.subtractStockAfterPurchase(
+            itemsAndQuantity,
+          );
+          await this.viandService.subtractStockAfterPurchase(itemsAndQuantity);
 
           // Obtenemos la orden.
           const clientOrder =
             await this.clientOrderService.getPendingClientOrderByCart(
               activeCartId,
             );
+
+          // Generamos la factura
+          const itemsForInvoice = paymentDetails.additional_info.items.map(
+            (item: any) => {
+              return {
+                id: item.id,
+                quantity: item.quantity,
+                price: item.unit_price,
+                name: item.title,
+              };
+            },
+          );
+
+          await this.invoiceService.generateInvoice(
+            clientOrder.clientOrderId,
+            itemsForInvoice,
+          );
 
           // Guardamos el pago en la DB (para que no se ejecute la operacion varias veces).
           await this.paymentService.markPaymentAsProcessed({
@@ -84,9 +112,11 @@ export class WebhookService {
           // Vaciamos el carrito.
           await this.cartItemService.emptyCart(activeCartId);
 
-          // Creamos un nuevo carrito para el usuario activo.
+          // Creamos un nuevo carrito para el usuario activo y lo enviamos por websockets.
           const cart = await this.cartService.getCartById(activeCartId);
-          await this.cartService.createCart(cart.user);
+          const newCart = await this.cartService.createCart(cart.user);
+
+          this.socketGateway.sendNewCart(cart.user.userId, newCart);
 
           // Deshabilitamos el carrito.
           await this.cartService.disableCart(activeCartId);
@@ -98,15 +128,47 @@ export class WebhookService {
               'Tu compra ha sido exitosa!',
             );
 
-          this.socketGateway.notifyUserSuccessfulPurchase(
+          this.socketGateway.notifyUserAfterPurchase(
             cart.user.userId,
             notification,
           );
         } else if (paymentDetails.status === 'rejected') {
-          console.log('rechazado');
+          // Creamos una notificacion y la enviamos al usuario en tiempo real.
+          const cart = await this.cartService.getCartById(activeCartId);
+
+          const notification =
+            await this.notificationService.createNotification(
+              cart.user.userId,
+              'Tu compra ha sido rechazada, intente nuevamente',
+            );
+
+          this.socketGateway.notifyUserAfterPurchase(
+            cart.user.userId,
+            notification,
+          );
+        } else {
+          const cart = await this.cartService.getCartById(activeCartId);
+
+          const notification =
+            await this.notificationService.createNotification(
+              cart.user.userId,
+              'Tu pago está en proceso, te notificaremos cuando se confirme.',
+            );
+
+          this.socketGateway.notifyUserAfterPurchase(
+            cart.user.userId,
+            notification,
+          );
         }
       }
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadGatewayException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
       throw new BadGatewayException('Error handling web hook');
     }
   }

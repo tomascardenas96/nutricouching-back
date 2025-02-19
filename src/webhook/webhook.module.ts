@@ -9,6 +9,7 @@ import { ClientOrderModule } from 'src/client-order/client-order.module';
 import { CartModule } from 'src/cart/cart.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { SocketModule } from 'src/socket/socket.module';
+import { InvoiceModule } from 'src/invoice/invoice.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SocketModule } from 'src/socket/socket.module';
     CartModule,
     NotificationModule,
     SocketModule,
+    InvoiceModule,
   ],
   controllers: [WebhookController],
   providers: [WebhookService],

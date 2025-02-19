@@ -12,6 +12,7 @@ import { UpdateSocketDto } from './dto/update-socket.dto';
 import { Server, Socket } from 'socket.io';
 import { NotificationService } from 'src/notification/notification.service';
 import { Notification } from 'src/notification/entities/notification.entity';
+import { Cart } from 'src/cart/entities/cart.entity';
 
 @WebSocketGateway({ cors: { origin: '*', credentials: true } })
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -41,10 +42,14 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit(`deletedBookingNotify`, { ...notification });
   }
 
-  notifyUserSuccessfulPurchase(userId: string, notification: Notification) {
+  notifyUserAfterPurchase(userId: string, notification: Notification) {
     this.server
       .to(`user_${userId}`)
-      .emit(`successfullPurchaseNotify`, { ...notification });
+      .emit(`afterPurchaseNotify`, { ...notification });
+  }
+
+  sendNewCart(userId: string, cart: Cart) {
+    this.server.to(`user_${userId}`).emit(`sendNewCart`, { ...cart });
   }
 
   handleDisconnect(client: Socket) {

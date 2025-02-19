@@ -2,7 +2,7 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class GenerateInvoiceDto {
   @IsString()
-  itemId: string;
+  id: string;
 
   @IsNumber()
   quantity: number;

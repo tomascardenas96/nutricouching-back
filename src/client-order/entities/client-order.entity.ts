@@ -7,7 +7,7 @@ import {
   JoinColumn,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { OrderStatus } from '../enum/order-status.enum';
 
@@ -31,7 +31,9 @@ export class ClientOrder {
   }) // Permite múltiples pagos
   payments: Payment[];
 
-  @OneToMany(() => Invoice, (invoice) => invoice.order, { onDelete: 'CASCADE' })
+  @OneToMany(() => Invoice, (invoice) => invoice.order, {
+    onDelete: 'SET NULL',
+  })
   invoice: Invoice[];
 
   // Crear una entidad que guarde el historial de los productos actualmente en el carrito antes de ser eliminados por el webhook.
