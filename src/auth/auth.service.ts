@@ -13,6 +13,7 @@ import { MailService } from 'src/mail/mail.service';
 import * as bcryptjs from 'bcryptjs';
 import { User } from 'src/user/entity/user.entity';
 import { CartService } from 'src/cart/cart.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -201,6 +202,38 @@ export class AuthService {
       throw new BadGatewayException(
         'Error reseting password, token invalid or expired',
       );
+    }
+  }
+
+  /**
+   * Actualizar los datos de usuario
+   *
+   * @param userId - ID del usuario que solicita actualizacion
+   * @param updateUserDto - Objeto que contiene los datos enviados por el usuario
+   * @returns - Confirmacion de filas afectadas
+   */
+  async modifyUserInformation(userId: string, updateUserDto: UpdateUserDto) {
+    try {
+      if (updateUserDto.password) {
+        const hashedPassword = await bcryptjs.hash(updateUserDto.password, 10);
+
+        const updateUserAndPassword = {
+          ...updateUserDto,
+          password: hashedPassword,
+        };
+
+        return await this.userService.modifyUserInformation(
+          userId,
+          updateUserAndPassword,
+        );
+      }
+
+      return await this.userService.modifyUserInformation(
+        userId,
+        updateUserDto,
+      );
+    } catch (error) {
+      throw new BadGatewayException('Error modifying user information');
     }
   }
 }

@@ -6,10 +6,7 @@ export class RegisterDto {
 
   @IsString()
   lastname: string;
-
-  @IsString()
-  username: string;
-
+  
   @IsEmail()
   email: string;
 

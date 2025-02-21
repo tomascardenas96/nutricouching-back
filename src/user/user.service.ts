@@ -9,6 +9,7 @@ import { Professional } from 'src/professional/entities/professional.entity';
 import { ILike, IsNull, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entity/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -32,14 +33,6 @@ export class UserService {
       });
       if (!!existentEmail) {
         throw new BadRequestException('Email already exists');
-      }
-
-      const existentUserName: User = await this.userRepository.findOne({
-        where: { username: user.username },
-      });
-
-      if (!!existentUserName) {
-        throw new BadRequestException('Username already exists');
       }
 
       const newUser: User = this.userRepository.create({ ...user });
@@ -149,6 +142,18 @@ export class UserService {
       return this.userRepository.update(userId, { password: newPassword });
     } catch (error) {
       throw new BadGatewayException('Error updating user password');
+    }
+  }
+
+  async modifyUserInformation(userId: string, updateUserDto: UpdateUserDto) {
+    try {
+      let user = await this.findUserById(userId);
+
+      // user = { ...user };
+
+      return await this.userRepository.update(userId, updateUserDto);
+    } catch (error) {
+      throw new BadGatewayException('Error morifying user information');
     }
   }
 

@@ -7,11 +7,13 @@ import {
   UseGuards,
   Request,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { TokenGuard } from './guard/token.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -46,5 +48,13 @@ export class AuthController {
   @Post('reset-password')
   resetPassword(@Body() body: { token: string; newPassword: string }) {
     return this.authService.resetPassword(body);
+  }
+
+  @Patch('update/:userId')
+  modifyUserInformation(
+    @Param('userId') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.authService.modifyUserInformation(userId, updateUserDto);
   }
 }
