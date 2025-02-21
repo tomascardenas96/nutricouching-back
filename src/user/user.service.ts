@@ -149,8 +149,6 @@ export class UserService {
     try {
       let user = await this.findUserById(userId);
 
-      // user = { ...user };
-
       return await this.userRepository.update(userId, updateUserDto);
     } catch (error) {
       throw new BadGatewayException('Error morifying user information');

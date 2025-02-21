@@ -214,7 +214,26 @@ export class AuthService {
    */
   async modifyUserInformation(userId: string, updateUserDto: UpdateUserDto) {
     try {
+      // Si el usuario solicita un cambio de contraseña (a parte de alguna otra propiedad) primero comprobamos que concuerda la contraseña anterior y luego hasheamos la nueva antes de enviarla a la DB.
       if (updateUserDto.password) {
+        if (!updateUserDto.oldPassword) {
+          throw new BadRequestException('Old password is required');
+        }
+        
+        const user = await this.userService.findUserById(userId);
+        const userWithPassword = await this.userService.findUserByEmail(
+          user.email,
+        );
+
+        const isCorrectPassword = await bcryptjs.compare(
+          updateUserDto.oldPassword,
+          userWithPassword.password,
+        );
+
+        if (!isCorrectPassword) {
+          throw new BadRequestException('Incorrect password');
+        }
+
         const hashedPassword = await bcryptjs.hash(updateUserDto.password, 10);
 
         const updateUserAndPassword = {
@@ -222,9 +241,20 @@ export class AuthService {
           password: hashedPassword,
         };
 
+        // Filtrar la propiedad oldPassword
+        const filteredNonNeededProperty = Object.entries(
+          updateUserAndPassword,
+        ).reduce(
+          (acc, [key, value]) => {
+            if (key !== 'oldPassword') acc[key] = value;
+            return acc;
+          },
+          {} as Record<string, any>,
+        );
+
         return await this.userService.modifyUserInformation(
           userId,
-          updateUserAndPassword,
+          filteredNonNeededProperty,
         );
       }
 
@@ -233,6 +263,13 @@ export class AuthService {
         updateUserDto,
       );
     } catch (error) {
+      if (
+        error instanceof BadGatewayException ||
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new BadGatewayException('Error modifying user information');
     }
   }
