@@ -1,8 +1,10 @@
-import { Controller, Post, Param, Body } from '@nestjs/common';
+import { Controller, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { ClientOrderService } from './client-order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('client-order')
+@UseGuards(TokenGuard)
 export class ClientOrderController {
   constructor(private readonly clientOrderService: ClientOrderService) {}
 

@@ -9,6 +9,7 @@ import {
   UploadedFile,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import ServiceDto from './dto/service.dto';
@@ -18,8 +19,10 @@ import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('service')
+@UseGuards(TokenGuard)
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 

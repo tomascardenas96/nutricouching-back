@@ -8,6 +8,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
@@ -18,8 +19,10 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { ProductService } from './product.service';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('product')
+@UseGuards(TokenGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 

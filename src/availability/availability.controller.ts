@@ -6,12 +6,15 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { Days } from 'src/common/enum/days.enum';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('availability')
+@UseGuards(TokenGuard)
 export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 

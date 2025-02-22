@@ -51,6 +51,7 @@ export class AuthController {
   }
 
   @Patch('update/:userId')
+  @UseGuards(TokenGuard)
   modifyUserInformation(
     @Param('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,

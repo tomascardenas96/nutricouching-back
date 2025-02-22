@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards
 } from '@nestjs/common';
 import { SpecialtyService } from './specialty.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('specialty')
+@UseGuards(TokenGuard)
 export class SpecialtyController {
   constructor(private readonly specialtyService: SpecialtyService) {}
 

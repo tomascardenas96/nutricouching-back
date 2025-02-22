@@ -8,6 +8,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
@@ -16,8 +17,10 @@ import { extname } from 'path';
 import { CreateViandDto } from './dto/create-viand.dto';
 import { ViandService } from './viand.service';
 import { UpdateViandDto } from './dto/update-viand.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('viand')
+@UseGuards(TokenGuard)
 export class ViandController {
   constructor(private readonly viandService: ViandService) {}
 

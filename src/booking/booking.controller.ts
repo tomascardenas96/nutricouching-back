@@ -13,6 +13,7 @@ import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Controller('booking')
+@UseGuards(TokenGuard)
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 

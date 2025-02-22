@@ -9,6 +9,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { AssignSpecialtyDto } from './dto/assign-specialty.dto';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
@@ -18,8 +19,10 @@ import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('professional')
+@UseGuards(TokenGuard)
 export class ProfessionalController {
   constructor(private readonly professionalService: ProfessionalService) {}
 

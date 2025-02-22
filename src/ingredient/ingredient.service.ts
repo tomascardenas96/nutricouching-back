@@ -48,20 +48,4 @@ export class IngredientService {
       throw new BadGatewayException('Error creating a new ingredient');
     }
   }
-
-  findAll() {
-    return `This action returns all ingredient`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} ingredient`;
-  }
-
-  update(id: number, updateIngredientDto: UpdateIngredientDto) {
-    return `This action updates a #${id} ingredient`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} ingredient`;
-  }
 }
