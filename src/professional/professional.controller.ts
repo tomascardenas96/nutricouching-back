@@ -22,11 +22,11 @@ import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('professional')
-@UseGuards(TokenGuard)
 export class ProfessionalController {
   constructor(private readonly professionalService: ProfessionalService) {}
 
   @Post('create')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -61,11 +61,13 @@ export class ProfessionalController {
   }
 
   @Get('specialty')
+  @UseGuards(TokenGuard)
   findProfessionalsBySpecialty(@Query('id') specialtyId: string) {
     return this.professionalService.findProfessionalsBySpecialty(specialtyId);
   }
 
   @Patch('update/:professionalId')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -100,6 +102,7 @@ export class ProfessionalController {
   }
 
   @Delete('delete/:professionalId')
+  @UseGuards(TokenGuard)
   deleteProfessional(@Param('professionalId') professionalId: string) {
     return this.professionalService.deleteProfessional(professionalId);
   }

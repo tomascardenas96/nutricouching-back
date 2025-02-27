@@ -22,12 +22,12 @@ import { ProductService } from './product.service';
 import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('product')
-@UseGuards(TokenGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   // Crear un nuevo producto
   @Post()
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -66,12 +66,14 @@ export class ProductController {
 
   // Eliminar un producto
   @Delete('delete/:productId')
+  @UseGuards(TokenGuard)
   deleteProduct(@Param('productId') productId: string): Promise<DeleteResult> {
     return this.productService.deleteProduct(productId);
   }
 
   // Modificar un producto
   @Patch('update/:productId')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

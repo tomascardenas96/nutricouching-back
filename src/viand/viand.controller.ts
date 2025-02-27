@@ -20,11 +20,11 @@ import { UpdateViandDto } from './dto/update-viand.dto';
 import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('viand')
-@UseGuards(TokenGuard)
 export class ViandController {
   constructor(private readonly viandService: ViandService) {}
 
   @Post('create')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -59,11 +59,13 @@ export class ViandController {
   }
 
   @Delete('delete/:viandId')
+  @UseGuards(TokenGuard)
   deleteViand(@Param('viandId') viandId: string) {
     return this.viandService.deleteViand(viandId);
   }
 
   @Patch('update/:viandId')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
