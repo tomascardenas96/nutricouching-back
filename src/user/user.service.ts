@@ -147,7 +147,12 @@ export class UserService {
 
   async modifyUserInformation(userId: string, updateUserDto: UpdateUserDto) {
     try {
-      let user = await this.findUserById(userId);
+      if (!updateUserDto.password) {
+        return await this.userRepository.update(userId, {
+          name: updateUserDto.name || undefined,
+          lastname: updateUserDto.lastname || undefined,
+        });
+      }
 
       return await this.userRepository.update(userId, updateUserDto);
     } catch (error) {

@@ -14,6 +14,7 @@ import * as bcryptjs from 'bcryptjs';
 import { User } from 'src/user/entity/user.entity';
 import { CartService } from 'src/cart/cart.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangeStream } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -219,7 +220,7 @@ export class AuthService {
         if (!updateUserDto.oldPassword) {
           throw new BadRequestException('Old password is required');
         }
-        
+
         const user = await this.userService.findUserById(userId);
         const userWithPassword = await this.userService.findUserByEmail(
           user.email,
