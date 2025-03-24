@@ -108,6 +108,7 @@ export class CartItemService {
           } else {
             productsToAddList.push({
               product: productToAdd,
+              viand: null,
               quantity: product.quantity,
               cart,
             });
@@ -134,6 +135,7 @@ export class CartItemService {
           } else {
             productsToAddList.push({
               viand: viandToAdd,
+              product: null,
               quantity: viand.quantity,
               cart,
             });

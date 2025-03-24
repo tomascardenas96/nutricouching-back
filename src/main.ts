@@ -23,6 +23,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(3010);
+  await app.listen(3010, '0.0.0.0');
 }
 bootstrap();

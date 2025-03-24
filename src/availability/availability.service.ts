@@ -35,6 +35,7 @@ export class AvailabilityService {
   ): Promise<Availability[]> {
     try {
       const availabilities: Availability[] = [];
+      const iterationChecker = [];
 
       // Buscamos al profesional por ID
       const professional =
@@ -45,6 +46,23 @@ export class AvailabilityService {
 
       // Recorremos el arreglo de disponibilidades (av) y generamos los horarios
       av.forEach((item) => {
+        if (iterationChecker.length > 0) {
+          iterationChecker.forEach((element) => {
+            if (
+              element.day.includes(item.day[0]) &&
+              !(
+                item.startTime >= element.endTime ||
+                item.endTime <= element.startTime
+              )
+            ) {
+              throw new BadRequestException(
+                'Invalid time slot: overlapping availability',
+              );
+            }
+          });
+        }
+        iterationChecker.push(item);
+
         item.day.forEach((day) => {
           // Convertimos las horas de inicio y fin en objetos DateTime
           let startTime = DateTime.fromISO(`1970-01-01T${item.startTime}`);
@@ -59,10 +77,13 @@ export class AvailabilityService {
             // Si el tiempo de inicio excede el tiempo final, salimos del ciclo
             if (startTime > finalTime) break;
 
+            // const verifyRepeatedAvailabilities = availabilities.find((a) => {
+
+            // });
+
             const exists = existentAvailabilities.find(
               (availability) =>
                 availability.startTime === start &&
-                availability.endTime === end &&
                 availability.day === day &&
                 availability.professional.professionalId ===
                   professional.professionalId,
@@ -80,6 +101,10 @@ export class AvailabilityService {
                   slotStart: item.startTime,
                   slotEnd: item.endTime,
                 });
+
+              // if (verifyRepeatedAvailabilities) {
+              //   throw new BadRequestException('Availability already exists');
+              // }
 
               availabilities.push(availability);
             } else {
@@ -267,6 +292,7 @@ export class AvailabilityService {
             })
           ) {
             listOfAvailabilities.push({
+              availabilityId: availability.availabilityId,
               day: slot,
               startTime: availability.slotStart,
               endTime: availability.slotEnd,
@@ -278,13 +304,13 @@ export class AvailabilityService {
 
       // Agrupar y ordenar
       const groupedAvailabilities = listOfAvailabilities.reduce((acc, curr) => {
-        const { day, startTime, endTime, interval } = curr;
+        const { availabilityId, day, startTime, endTime, interval } = curr;
 
         if (!acc[day]) {
           acc[day] = [];
         }
 
-        acc[day].push({ startTime, endTime, interval });
+        acc[day].push({ availabilityId, startTime, endTime, interval });
         return acc;
       }, {});
 
