@@ -18,6 +18,9 @@ export class Specialty {
   @Column()
   name: string;
 
+  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
   @ManyToOne(() => Service, (service) => service.specialty, {
     eager: true,
     onDelete: 'CASCADE',

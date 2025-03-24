@@ -5,12 +5,14 @@ import { ProfessionalModule } from '../professional/professional.module';
 import { AvailabilityController } from './availability.controller';
 import { AvailabilityService } from './availability.service';
 import { Availability } from './entities/availability.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Availability]),
     BookingModule,
     ProfessionalModule,
+    UserModule
   ],
   controllers: [AvailabilityController],
   providers: [AvailabilityService],

@@ -108,6 +108,7 @@ export class CartItemService {
           } else {
             productsToAddList.push({
               product: productToAdd,
+              viand: null,
               quantity: product.quantity,
               cart,
             });
@@ -134,6 +135,7 @@ export class CartItemService {
           } else {
             productsToAddList.push({
               viand: viandToAdd,
+              product: null,
               quantity: viand.quantity,
               cart,
             });
@@ -202,6 +204,21 @@ export class CartItemService {
       }
     } catch (error) {
       throw new BadGatewayException('Error adding or subtracting unity');
+    }
+  }
+
+  /**
+   * Metodo utilizado para vaciar el carrito del usuario activo
+   *
+   * @param cartId - ID del carrito activo
+   * @returns - Cantidad de filas afectadas
+   */
+  async emptyCart(cartId: string) {
+    try {
+      console.log(cartId);
+      return await this.cartItemRepository.delete({ cart: { cartId } });
+    } catch (error) {
+      throw new BadGatewayException('Error emptying cart');
     }
   }
 }

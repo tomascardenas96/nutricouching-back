@@ -8,11 +8,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
-import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('booking')
+@UseGuards(TokenGuard)
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
@@ -34,7 +35,7 @@ export class BookingController {
     return this.bookingService.getBookingsByUser(userId);
   }
 
-  @Get('available') 
+  @Get('available')
   async isDateAvailable(
     @Query('date') date: string,
     @Query('professionalId') professionalId: string,
@@ -42,8 +43,11 @@ export class BookingController {
     return this.bookingService.isDateAvailable(new Date(date), professionalId);
   }
 
-  @Delete('delete/:bookingId')
-  async cancelBooking(@Param('bookingId') bookingId: string) {
-    return await this.bookingService.cancelBooking(bookingId);
+  @Delete('delete/:bookingId/active-user/:userId')
+  async cancelBooking(
+    @Param('bookingId') bookingId: string,
+    @Param('userId') activeUserId: string,
+  ) {
+    return await this.bookingService.cancelBooking(bookingId, activeUserId);
   }
 }

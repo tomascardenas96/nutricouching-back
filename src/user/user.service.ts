@@ -5,19 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, IsNull, Repository, UpdateResult } from 'typeorm';
+import { Professional } from 'src/professional/entities/professional.entity';
+import { ILike, IsNull, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entity/user.entity';
-import { CartService } from 'src/cart/cart.service';
-import { Cart } from 'src/cart/entities/cart.entity';
-import { Professional } from 'src/professional/entities/professional.entity';
-import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly cartService: CartService,
   ) {}
 
   async getAllUsers() {
@@ -34,26 +31,18 @@ export class UserService {
       const existentEmail: User = await this.userRepository.findOne({
         where: { email: user.email },
       });
-      if (existentEmail) {
+      if (!!existentEmail) {
         throw new BadRequestException('Email already exists');
       }
 
-      const existentUserName: User = await this.userRepository.findOne({
-        where: { username: user.username },
-      });
-      if (existentUserName) {
-        throw new BadRequestException('Username already exists');
-      }
-
-      //Creamos un carrito automaticamente
-      const cart: Cart = await this.cartService.createCart();
-
-      //Y lo asignamos al nuevo usuario
-      const newUser: User = this.userRepository.create({ ...user, cart });
+      const newUser: User = this.userRepository.create({ ...user });
 
       return this.userRepository.save(newUser);
     } catch (error) {
-      if (error instanceof BadRequestException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof BadGatewayException
+      ) {
         throw error;
       }
       throw new BadGatewayException('Error creating a new user');
@@ -62,12 +51,21 @@ export class UserService {
 
   async findUserByEmail(email: string): Promise<User> {
     try {
-      return await this.userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: { email },
         select: ['email', 'password', 'userId'],
       });
+
+      if (!user) {
+        throw new NotFoundException('User email not found');
+      }
+
+      return user;
     } catch (error) {
-      throw new Error('Error getting user by email');
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadGatewayException('Error finding user by email');
     }
   }
 
@@ -75,6 +73,7 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({
         where: { userId },
+        relations: ['cart'],
       });
 
       if (!user) {
@@ -135,6 +134,29 @@ export class UserService {
       throw new BadGatewayException(
         'Error trying to assign a user as professional',
       );
+    }
+  }
+
+  async updatePassword(userId: string, newPassword: string) {
+    try {
+      return this.userRepository.update(userId, { password: newPassword });
+    } catch (error) {
+      throw new BadGatewayException('Error updating user password');
+    }
+  }
+
+  async modifyUserInformation(userId: string, updateUserDto: UpdateUserDto) {
+    try {
+      if (!updateUserDto.password) {
+        return await this.userRepository.update(userId, {
+          name: updateUserDto.name || undefined,
+          lastname: updateUserDto.lastname || undefined,
+        });
+      }
+
+      return await this.userRepository.update(userId, updateUserDto);
+    } catch (error) {
+      throw new BadGatewayException('Error morifying user information');
     }
   }
 

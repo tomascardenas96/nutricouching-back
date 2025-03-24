@@ -4,11 +4,13 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { MailModule } from 'src/mail/mail.module';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   imports: [
     UserModule,
     MailModule,
+    CartModule,
     JwtModule.register({
       global: true,
       secret: process.env.SECRET_KEY,

@@ -14,8 +14,10 @@ import { ViandModule } from 'src/viand/viand.module';
     ProductModule,
     CartModule,
     ViandModule,
+    UserModule
   ],
   controllers: [CartItemController],
   providers: [CartItemService],
+  exports: [CartItemService],
 })
 export class CartItemModule {}

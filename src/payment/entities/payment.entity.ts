@@ -1,9 +1,9 @@
 import { ClientOrder } from 'src/client-order/entities/client-order.entity';
-import { StatusPayment } from 'src/common/enum/status-payment.enum';
 import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -11,18 +11,17 @@ import {
 @Entity()
 export class Payment {
   @PrimaryGeneratedColumn('uuid')
-  paymentId: string;
+  id: string;
 
-  @Column({ type: 'enum', enum: StatusPayment })
-  status: StatusPayment;
+  @Column({ unique: true })
+  paymentId: string;
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @OneToOne(() => ClientOrder, (clientOrder) => clientOrder.payment)
+  @ManyToOne(() => ClientOrder, (clientOrder) => clientOrder.payments, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'clientOrder' })
   clientOrder: ClientOrder;
-
-  @Column()
-  total: number;
 }

@@ -8,6 +8,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
@@ -16,12 +17,14 @@ import { extname } from 'path';
 import { CreateViandDto } from './dto/create-viand.dto';
 import { ViandService } from './viand.service';
 import { UpdateViandDto } from './dto/update-viand.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('viand')
 export class ViandController {
   constructor(private readonly viandService: ViandService) {}
 
   @Post('create')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -56,11 +59,13 @@ export class ViandController {
   }
 
   @Delete('delete/:viandId')
+  @UseGuards(TokenGuard)
   deleteViand(@Param('viandId') viandId: string) {
     return this.viandService.deleteViand(viandId);
   }
 
   @Patch('update/:viandId')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({

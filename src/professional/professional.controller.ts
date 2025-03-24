@@ -9,6 +9,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { AssignSpecialtyDto } from './dto/assign-specialty.dto';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
@@ -18,12 +19,14 @@ import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('professional')
 export class ProfessionalController {
   constructor(private readonly professionalService: ProfessionalService) {}
 
   @Post('create')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -58,11 +61,13 @@ export class ProfessionalController {
   }
 
   @Get('specialty')
+  @UseGuards(TokenGuard)
   findProfessionalsBySpecialty(@Query('id') specialtyId: string) {
     return this.professionalService.findProfessionalsBySpecialty(specialtyId);
   }
 
   @Patch('update/:professionalId')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -97,6 +102,7 @@ export class ProfessionalController {
   }
 
   @Delete('delete/:professionalId')
+  @UseGuards(TokenGuard)
   deleteProfessional(@Param('professionalId') professionalId: string) {
     return this.professionalService.deleteProfessional(professionalId);
   }

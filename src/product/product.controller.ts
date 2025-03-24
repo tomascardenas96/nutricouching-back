@@ -8,6 +8,7 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
@@ -18,6 +19,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { ProductService } from './product.service';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('product')
 export class ProductController {
@@ -25,6 +27,7 @@ export class ProductController {
 
   // Crear un nuevo producto
   @Post()
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -63,12 +66,14 @@ export class ProductController {
 
   // Eliminar un producto
   @Delete('delete/:productId')
+  @UseGuards(TokenGuard)
   deleteProduct(@Param('productId') productId: string): Promise<DeleteResult> {
     return this.productService.deleteProduct(productId);
   }
 
   // Modificar un producto
   @Patch('update/:productId')
+  @UseGuards(TokenGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
