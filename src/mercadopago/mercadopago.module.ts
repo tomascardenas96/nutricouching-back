@@ -7,5 +7,6 @@ import { UserModule } from 'src/user/user.module';
   imports: [UserModule],
   controllers: [MercadopagoController],
   providers: [MercadopagoService],
+  exports: [MercadopagoService],
 })
 export class MercadopagoModule {}

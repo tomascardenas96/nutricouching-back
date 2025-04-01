@@ -2,16 +2,18 @@ import { Booking } from 'src/booking/entities/booking.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Plan } from 'src/common/enum/plan.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
+import { PlanPurchase } from 'src/plan_purchase/entities/plan-pucharse.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -66,4 +68,7 @@ export class User {
     onDelete: 'CASCADE',
   })
   notifications: Notification[];
+
+  @OneToMany(() => PlanPurchase, (planPurchase) => planPurchase.user)
+  planPurchase: PlanPurchase[];
 }

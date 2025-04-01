@@ -1,20 +1,21 @@
 import {
-  WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  WebSocketServer,
+  WebSocketGateway,
+  WebSocketServer
 } from '@nestjs/websockets';
-import { SocketService } from './socket.service';
-import { CreateSocketDto } from './dto/create-socket.dto';
-import { UpdateSocketDto } from './dto/update-socket.dto';
 import { Server, Socket } from 'socket.io';
-import { NotificationService } from 'src/notification/notification.service';
-import { Notification } from 'src/notification/entities/notification.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { Notification } from 'src/notification/entities/notification.entity';
+import { NotificationService } from 'src/notification/notification.service';
+import { SocketService } from './socket.service';
 
-@WebSocketGateway({ cors: { origin: '*', credentials: true } })
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+})
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -33,7 +34,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     client.join(`user_${userId}`);
-    console.log(`Client ${userId} connected to channel user_${userId} `);
   }
 
   notifyUserDeletedBooking(userId: string, notification: Notification) {
@@ -53,6 +53,5 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`client disconnected: `, client.id);
   }
 }
