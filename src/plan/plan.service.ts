@@ -1,22 +1,21 @@
 import {
   BadGatewayException,
-  ForbiddenException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  HttpException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Plan } from './entities/plan.entity';
-import { Repository } from 'typeorm';
+import { Response } from 'express';
+import * as fs from 'fs';
+import { join } from 'path';
+import { MercadopagoService } from 'src/mercadopago/mercadopago.service';
 import { PlanPurchase } from 'src/plan_purchase/entities/plan-pucharse.entity';
 import { UserService } from 'src/user/user.service';
+import { Repository } from 'typeorm';
 import { CreatePlanDto } from './dto/create-plan.dto';
-import { Response } from 'express';
-import { join } from 'path';
-import * as fs from 'fs';
+import { Plan } from './entities/plan.entity';
 import { User } from 'src/user/entity/user.entity';
-import { MercadopagoService } from 'src/mercadopago/mercadopago.service';
 
 @Injectable()
 export class PlanService {
@@ -30,14 +29,14 @@ export class PlanService {
 
   async createPlan(
     { title, description, price }: CreatePlanDto,
-    file_url: string,
+    file_name: string,
   ) {
     try {
       const newPlan = this.planRepository.create({
         title,
         description,
         price: Number(price),
-        file_url,
+        file_url: file_name,
       });
 
       return this.planRepository.save(newPlan);
@@ -95,10 +94,8 @@ export class PlanService {
     }
   }
 
-  async processPlanPayment(activeUser: User, planId: string) {
+  async processPlanPayment(plan: Plan) {
     try {
-      const plan = await this.planRepository.findOne({ where: { planId } });
-
       if (!plan) {
         throw new NotFoundException('Plan not found');
       }
@@ -109,6 +106,68 @@ export class PlanService {
         throw error;
       }
       throw new InternalServerErrorException('Error processing payment');
+    }
+  }
+
+  /**
+   * Obtener un plan por su id.
+   *
+   * @param planId
+   * @returns
+   */
+  async getPlanById(planId: string) {
+    try {
+      return await this.planRepository.findOne({ where: { planId } });
+    } catch (error) {
+      throw new InternalServerErrorException('Error getting plan');
+    }
+  }
+
+  /**
+   * Obtener todos los planes.
+   *
+   * @param user - Objeto del usuario activo
+   * @returns - Un array de planes dividido en 3 opciones (Gratis, Comprados, No comprados)
+   */
+  async getAllPlans(user: User) {
+    try {
+      // Obtener los planes gratuitos
+      const freePlans = await this.planRepository.find({ where: { price: 0 } });
+
+      // Obtener los planes comprados por el usuario con la relación 'plan'
+      const purchasedPlans = await this.planPurchaseRepository.find({
+        where: { user: { userId: user.userId }, payment_status: 'approved' },
+        relations: ['plan'], // Asegurar que traemos la relación con 'plan'
+      });
+
+      // Extraer los planes completos de la relación
+      const purchasedPlansList = purchasedPlans.map((p) => p.plan);
+
+      // Extraer solo los IDs de los planes comprados para la consulta
+      const purchasedPlanIds = purchasedPlansList.map((plan) => plan.planId);
+
+      // Extraer solo los IDs de los planes gratis para la consulta
+      const freePlansIds = freePlans.map((fp) => fp.planId);
+
+      // Obtener los planes no comprados (excluyendo los comprados y los gratuitos)
+      const notPurchasedPlans = await this.planRepository
+        .createQueryBuilder('plan') // Alias de la tabla
+        .where('plan.planId NOT IN (:...excludedPlans)', {
+          excludedPlans: purchasedPlanIds.length > 0 ? purchasedPlanIds : [0], // Evita error si está vacío
+        })
+        .andWhere('plan.planId NOT IN (:...excludedFree)', {
+          excludedFree: freePlansIds.length > 0 ? freePlansIds : [0], // Evita error si está vacío
+        })
+        .getMany(); // Ejecutar la consulta
+
+      return {
+        freePlans, // Planes gratuitos
+        purchasedPlans: purchasedPlansList, // Planes comprados completos
+        notPurchasedPlans, // Planes no comprados completos
+      };
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException('Error getting all plans');
     }
   }
 }

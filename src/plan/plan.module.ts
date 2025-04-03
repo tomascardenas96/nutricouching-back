@@ -16,5 +16,6 @@ import { MercadopagoModule } from 'src/mercadopago/mercadopago.module';
   ],
   controllers: [PlanController],
   providers: [PlanService],
+  exports: [PlanService]
 })
 export class PlanModule {}

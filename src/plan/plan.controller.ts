@@ -47,8 +47,8 @@ export class PlanController {
     @UploadedFile() file: Express.Multer.File,
     @Body() plan: CreatePlanDto,
   ) {
-    const file_url = `${process.env.UPLOADS_PATH}/plans/${file.filename}`;
-    return this.planService.createPlan(plan, file_url);
+    const file_name = file.filename;
+    return this.planService.createPlan(plan, file_name);
   }
 
   @Get(':planId/download')
@@ -57,12 +57,9 @@ export class PlanController {
     return this.planService.downloadPlan(planId, res);
   }
 
-  @Post(':planId/purchase')
+  @Get()
   @UseGuards(TokenGuard)
-  processPlanPayment(
-    @ActiveUser() activeUser: User,
-    @Param('planId') planId: string,
-  ) {
-    return this.planService.processPlanPayment(activeUser, planId);
+  getAllPlans(@ActiveUser() user: User) {
+    return this.planService.getAllPlans(user);
   }
 }

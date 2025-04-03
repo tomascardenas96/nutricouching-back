@@ -10,8 +10,10 @@ import { ClientOrderService } from 'src/client-order/client-order.service';
 import { InvoiceService } from 'src/invoice/invoice.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { PaymentService } from 'src/payment/payment.service';
+import { PlanService } from 'src/plan/plan.service';
 import { ProductService } from 'src/product/product.service';
 import { SocketGateway } from 'src/socket/socket.gateway';
+import { User } from 'src/user/entity/user.entity';
 import { ViandService } from 'src/viand/viand.service';
 
 @Injectable()
@@ -26,6 +28,7 @@ export class WebhookService {
     private readonly notificationService: NotificationService,
     private readonly socketGateway: SocketGateway,
     private readonly invoiceService: InvoiceService,
+    private readonly planService: PlanService,
   ) {}
 
   async handleWebHook(webHookData: any) {
@@ -62,6 +65,19 @@ export class WebhookService {
          */
 
         if (paymentDetails.status === 'approved') {
+          console.log(paymentDetails.external_reference);
+
+          const plan = await this.planService.getPlanById(
+            paymentDetails.external_reference,
+          );
+
+          if (!!plan) {
+            // 1. Vamos a marcar el plan como pagado.
+            return await this.planService.processPlanPayment(plan);
+
+            // 2. Detenemos la ejecucion.
+          }
+
           const itemsAndQuantity = paymentDetails.additional_info.items.map(
             (item: any) => {
               return {
@@ -199,4 +215,6 @@ export class WebhookService {
       throw new BadGatewayException('Error getting payment details');
     }
   }
+
+  private;
 }

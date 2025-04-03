@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 import { WebhookService } from './webhook.service';
 
 @Controller('webhook')

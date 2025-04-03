@@ -19,11 +19,11 @@ export class PlanPurchase {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @ManyToOne(() => User, (user) => user.planPurchase)
+  @ManyToOne(() => User, (user) => user.planPurchase, { eager: true })
   @JoinColumn({ name: 'user' })
   user: User;
 
-  @ManyToOne(() => Plan, (plan) => plan.planPurchase)
+  @ManyToOne(() => Plan, (plan) => plan.planPurchase, { eager: true })
   @JoinColumn({ name: 'plan' })
   plan: Plan;
 }
