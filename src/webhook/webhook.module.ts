@@ -12,6 +12,7 @@ import { SocketModule } from 'src/socket/socket.module';
 import { InvoiceModule } from 'src/invoice/invoice.module';
 import { UserModule } from 'src/user/user.module';
 import { PlanModule } from 'src/plan/plan.module';
+import { PlanPurchaseModule } from 'src/plan_purchase/plan_purchase.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { PlanModule } from 'src/plan/plan.module';
     SocketModule,
     InvoiceModule,
     UserModule,
-    PlanModule
+    PlanModule,
+    PlanPurchaseModule,
   ],
   controllers: [WebhookController],
   providers: [WebhookService],

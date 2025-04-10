@@ -46,61 +46,81 @@ export class PlanService {
   }
 
   async downloadPlan(planId: string, res: Response) {
+    let fileStream: fs.ReadStream | null = null;
     try {
-      // 1. Obtener el plan de la base de datos
       const plan = await this.planRepository.findOne({ where: { planId } });
+      if (!plan?.file_url)
+        throw new NotFoundException('Plan o archivo no encontrado');
 
-      if (!plan || !plan.file_url) {
-        throw new NotFoundException('Archivo no encontrado');
-      }
-
-      // 2. Construir ruta del archivo (usando el nombre original)
       const filePath = join(
-        __dirname,
-        '..',
-        '..',
-        'uploads',
+        process.env.UPLOADS_DIR || join(__dirname, '..', '..', 'uploads'),
         'plans',
         plan.file_url,
       );
 
-      // 3. Configurar cabeceras para descarga
+      if (!fs.existsSync(filePath)) {
+        throw new NotFoundException('Archivo no encontrado en el servidor');
+      }
+
+      const safeFilename = plan.file_url.replace(/[^a-z0-9_.-]/gi, '_');
+
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="${plan.file_url}"`,
+        `attachment; filename="${safeFilename}"`,
       );
 
-      // 4. Enviar el archivo
-      const fileStream = fs.createReadStream(filePath);
+      fileStream = fs.createReadStream(filePath);
+
+      fileStream.on('error', (err) => {
+        console.error('Stream error:', err);
+        if (!res.headersSent) res.status(500).end();
+      });
+
       fileStream.pipe(res);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
+      if (fileStream) fileStream.destroy();
+      if (error instanceof NotFoundException) throw error;
+      console.error('Download error:', error);
       throw new InternalServerErrorException('Error al descargar el archivo');
     }
   }
 
   async hasUserPurchasedPlan(userId: string, planId: string): Promise<boolean> {
     try {
+      if (!planId) {
+        return false;
+      }
+
+      const plan = await this.getPlanById(planId);
+
+
+      if (plan.price === 0) {
+        return true;
+      }
+
       const purchase = await this.planPurchaseRepository.findOne({
         where: { user: { userId }, plan: { planId } },
       });
 
       return !!purchase;
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadGatewayException('Error checking plan purchase');
     }
   }
 
-  async processPlanPayment(plan: Plan) {
+  async purchasePlan(planId: string, user: User) {
     try {
+      const plan = await this.getPlanById(planId);
+
       if (!plan) {
         throw new NotFoundException('Plan not found');
       }
 
-      return await this.mercadopagoService.createPreference(null, plan);
+      return await this.mercadopagoService.createPreference(user, null, plan);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -131,8 +151,10 @@ export class PlanService {
    */
   async getAllPlans(user: User) {
     try {
+      const allPlans = await this.planRepository.find();
+
       // Obtener los planes gratuitos
-      const freePlans = await this.planRepository.find({ where: { price: 0 } });
+      const freePlans = allPlans.filter((plan) => plan.price === 0);
 
       // Obtener los planes comprados por el usuario con la relación 'plan'
       const purchasedPlans = await this.planPurchaseRepository.find({
@@ -149,16 +171,12 @@ export class PlanService {
       // Extraer solo los IDs de los planes gratis para la consulta
       const freePlansIds = freePlans.map((fp) => fp.planId);
 
-      // Obtener los planes no comprados (excluyendo los comprados y los gratuitos)
-      const notPurchasedPlans = await this.planRepository
-        .createQueryBuilder('plan') // Alias de la tabla
-        .where('plan.planId NOT IN (:...excludedPlans)', {
-          excludedPlans: purchasedPlanIds.length > 0 ? purchasedPlanIds : [0], // Evita error si está vacío
-        })
-        .andWhere('plan.planId NOT IN (:...excludedFree)', {
-          excludedFree: freePlansIds.length > 0 ? freePlansIds : [0], // Evita error si está vacío
-        })
-        .getMany(); // Ejecutar la consulta
+      const notPurchasedPlans = allPlans.filter((plan) => {
+        return (
+          !purchasedPlanIds.includes(plan.planId) &&
+          !freePlansIds.includes(plan.planId)
+        );
+      });
 
       return {
         freePlans, // Planes gratuitos

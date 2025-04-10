@@ -9,4 +9,5 @@ export class CreatePlanDto {
 
   @IsString()
   price: string;
+
 }

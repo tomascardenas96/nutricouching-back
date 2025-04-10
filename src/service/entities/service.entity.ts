@@ -1,5 +1,6 @@
 import { Booking } from 'src/booking/entities/booking.entity';
 import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
+import { ServiceType } from 'src/common/enum/service-type.enum';
 import { Professional } from 'src/professional/entities/professional.entity';
 import { Specialty } from 'src/specialty/entities/specialty.entity';
 import {
@@ -30,6 +31,9 @@ export class Service {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ type: 'enum', enum: ServiceType })
+  type: ServiceType;
 
   @OneToMany(() => Booking, (booking) => booking.service)
   booking: Booking;

@@ -6,6 +6,7 @@ import {
   BadRequestException,
 } from '@nestjs/common/exceptions';
 import { Plan } from 'src/plan/entities/plan.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class MercadopagoService {
@@ -17,8 +18,19 @@ export class MercadopagoService {
     });
   }
 
-  async createPreference(productsInCart?: ProductsInCartDto[], plan?: Plan) {
+  async createPreference(
+    user: User,
+    productsInCart?: ProductsInCartDto[],
+    plan?: Plan,
+  ) {
     try {
+      // Si el usuario solicito comprar un plan, se toma el id del carrito activo desde el usuario (proveniente del token).
+      // Y si solicita comprar productos, se toma el id del carrito activo desde el carrito de compras.
+      let lastCartIdPlan = user?.cart?.find((cart) => cart.isActive).cartId;
+      let lastCartIdProducts = productsInCart
+        ? productsInCart[0]?.cart?.cartId
+        : null;
+
       const preference = new Preference(this.client);
       // Si vienen productos desde un carrito se implementa una logica, si viene un plan se implementa otra.
       let items: any;
@@ -59,7 +71,13 @@ export class MercadopagoService {
             pending: `${process.env.SERVER_HOST}/home/pending`,
           },
           notification_url: `${process.env.WEB_HOOK_MP}/webhook`,
-          external_reference: plan?.planId || productsInCart[0]?.cart?.cartId,
+          // Se verifica si el usuario compro un plan o productos antes de tomar el id del carrito activo.
+          external_reference: lastCartIdPlan || lastCartIdProducts,
+          metadata: {
+            user_id: user.userId,
+            plan_id: plan?.planId || null,
+            service_type: !productsInCart && !!plan ? 'plan' : 'products',
+          },
         },
       };
 

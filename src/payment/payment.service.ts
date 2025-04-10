@@ -37,6 +37,7 @@ export class PaymentService {
   async markPaymentAsProcessed(payment: CreatePaymentDto): Promise<void> {
     try {
       const newPayment = this.paymentRepository.create(payment);
+
       await this.paymentRepository.save(newPayment);
     } catch (error) {
       throw new BadGatewayException('Error marking payment as processed');

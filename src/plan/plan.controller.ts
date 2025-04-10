@@ -62,4 +62,10 @@ export class PlanController {
   getAllPlans(@ActiveUser() user: User) {
     return this.planService.getAllPlans(user);
   }
+
+  @Post(':planId/purchase')
+  @UseGuards(TokenGuard)
+  purchasePlan(@Param('planId') planId: string, @ActiveUser() user: User) {
+    return this.planService.purchasePlan(planId, user);
+  }
 }

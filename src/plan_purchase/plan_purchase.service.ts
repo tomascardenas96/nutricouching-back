@@ -17,7 +17,7 @@ export class PlanPurchaseService {
     private readonly planService: PlanService,
   ) {}
 
-  async purchasePlan(user: User, planId: string, status: string) {
+  async processPlanPayment(user: User, planId: string, status: string) {
     try {
       const plan = await this.planService.getPlanById(planId);
 

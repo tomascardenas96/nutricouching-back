@@ -62,7 +62,7 @@ export class User {
   professional: Professional;
 
   @OneToMany(() => Cart, (cart) => cart.user)
-  cart: Cart;
+  cart: Cart[];
 
   @OneToMany(() => Notification, (notification) => notification.user, {
     onDelete: 'CASCADE',

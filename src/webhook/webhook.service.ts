@@ -1,8 +1,8 @@
 import {
-  Injectable,
   BadGatewayException,
-  NotFoundException,
   BadRequestException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CartItemService } from 'src/cart-item/cart-item.service';
 import { CartService } from 'src/cart/cart.service';
@@ -11,9 +11,9 @@ import { InvoiceService } from 'src/invoice/invoice.service';
 import { NotificationService } from 'src/notification/notification.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { PlanService } from 'src/plan/plan.service';
+import { PlanPurchaseService } from 'src/plan_purchase/plan_purchase.service';
 import { ProductService } from 'src/product/product.service';
 import { SocketGateway } from 'src/socket/socket.gateway';
-import { User } from 'src/user/entity/user.entity';
 import { ViandService } from 'src/viand/viand.service';
 
 @Injectable()
@@ -29,6 +29,7 @@ export class WebhookService {
     private readonly socketGateway: SocketGateway,
     private readonly invoiceService: InvoiceService,
     private readonly planService: PlanService,
+    private readonly planPurchaseService: PlanPurchaseService,
   ) {}
 
   async handleWebHook(webHookData: any) {
@@ -38,12 +39,19 @@ export class WebhookService {
         const paymentDetails = await this.getPaymentDetails(paymentId);
         const activeCartId = paymentDetails.external_reference;
 
+        const hasPurchase = await this.planService.hasUserPurchasedPlan(
+          paymentDetails.metadata.user_id,
+          paymentDetails.metadata.plan_id,
+        );
+
         const alreadyProcessed = await this.paymentService.isPaymentProcessed(
           paymentDetails.external_reference,
         );
 
-        if (alreadyProcessed) {
-          return;
+        if (hasPurchase) return;
+
+        if (paymentDetails.metadata.service_type === 'products') {
+          if (alreadyProcessed) return;
         }
 
         /**
@@ -65,17 +73,20 @@ export class WebhookService {
          */
 
         if (paymentDetails.status === 'approved') {
-          console.log(paymentDetails.external_reference);
-
-          const plan = await this.planService.getPlanById(
-            paymentDetails.external_reference,
-          );
-
-          if (!!plan) {
+          // Si es un plan, no se hace nada con el carrito, ya que no se generan ordenes.
+          if (!!paymentDetails.metadata.plan_id) {
             // 1. Vamos a marcar el plan como pagado.
-            return await this.planService.processPlanPayment(plan);
+            await this.planPurchaseService.processPlanPayment(
+              paymentDetails.metadata.user_id,
+              paymentDetails.metadata.plan_id,
+              'approved',
+            );
 
-            // 2. Detenemos la ejecucion.
+            // Creamos un pago en DB para guardar el registro
+            return await this.paymentService.markPaymentAsProcessed({
+              paymentId: paymentDetails.metadata.plan_id,
+              clientOrder: null,
+            });
           }
 
           const itemsAndQuantity = paymentDetails.additional_info.items.map(

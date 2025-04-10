@@ -24,6 +24,12 @@ export class Plan {
   @Column()
   file_url: string;
 
+  @Column({ default: false })
+  isOffer: boolean;
+
+  @Column({ nullable: true })
+  image: string;
+
   @OneToMany(() => PlanPurchase, (planPurchase) => planPurchase.plan)
   planPurchase: PlanPurchase[];
 }
