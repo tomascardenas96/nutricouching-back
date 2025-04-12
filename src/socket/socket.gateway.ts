@@ -2,10 +2,12 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   WebSocketGateway,
-  WebSocketServer
+  WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { ServiceType } from 'src/common/enum/service-type.enum';
+import { Status } from 'src/common/enum/status.enum';
 import { Notification } from 'src/notification/entities/notification.entity';
 import { NotificationService } from 'src/notification/notification.service';
 import { SocketService } from './socket.service';
@@ -42,16 +44,24 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit(`deletedBookingNotify`, { ...notification });
   }
 
-  notifyUserAfterPurchase(userId: string, notification: Notification) {
+  notifyUserAfterPurchase(
+    userId: string,
+    notification: Notification,
+    status: Status,
+    service: ServiceType,
+  ) {
     this.server
       .to(`user_${userId}`)
-      .emit(`afterPurchaseNotify`, { ...notification });
+      .emit(`afterPurchaseNotify`, { ...notification, status, service });
+  }
+
+  handlePurchasePlan(userId: string, planId: string) {
+    this.server.to(`user_${userId}`).emit(`purchasedPlan`, planId);
   }
 
   sendNewCart(userId: string, cart: Cart) {
     this.server.to(`user_${userId}`).emit(`sendNewCart`, { ...cart });
   }
 
-  handleDisconnect(client: Socket) {
-  }
+  handleDisconnect(client: Socket) {}
 }

@@ -8,6 +8,7 @@ import { PlanPurchase } from './entities/plan-pucharse.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { PlanService } from 'src/plan/plan.service';
+import { Status } from 'src/common/enum/status.enum';
 
 @Injectable()
 export class PlanPurchaseService {
@@ -17,7 +18,7 @@ export class PlanPurchaseService {
     private readonly planService: PlanService,
   ) {}
 
-  async processPlanPayment(user: User, planId: string, status: string) {
+  async processPlanPayment(user: User, planId: string, status: Status) {
     try {
       const plan = await this.planService.getPlanById(planId);
 
