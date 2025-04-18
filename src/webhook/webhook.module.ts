@@ -10,6 +10,9 @@ import { CartModule } from 'src/cart/cart.module';
 import { NotificationModule } from 'src/notification/notification.module';
 import { SocketModule } from 'src/socket/socket.module';
 import { InvoiceModule } from 'src/invoice/invoice.module';
+import { UserModule } from 'src/user/user.module';
+import { PlanModule } from 'src/plan/plan.module';
+import { PlanPurchaseModule } from 'src/plan_purchase/plan_purchase.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { InvoiceModule } from 'src/invoice/invoice.module';
     NotificationModule,
     SocketModule,
     InvoiceModule,
+    UserModule,
+    PlanModule,
+    PlanPurchaseModule,
   ],
   controllers: [WebhookController],
   providers: [WebhookService],

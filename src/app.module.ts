@@ -24,6 +24,8 @@ import { NotificationModule } from './notification/notification.module';
 import { MercadopagoModule } from './mercadopago/mercadopago.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { InvoiceModule } from './invoice/invoice.module';
+import { PlanModule } from './plan/plan.module';
+import { PlanPurchaseModule } from './plan_purchase/plan_purchase.module';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { InvoiceModule } from './invoice/invoice.module';
     MercadopagoModule,
     WebhookModule,
     InvoiceModule,
+    PlanModule,
+    PlanPurchaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

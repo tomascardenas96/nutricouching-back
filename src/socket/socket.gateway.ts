@@ -1,20 +1,23 @@
 import {
-  WebSocketGateway,
-  SubscribeMessage,
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { SocketService } from './socket.service';
-import { CreateSocketDto } from './dto/create-socket.dto';
-import { UpdateSocketDto } from './dto/update-socket.dto';
 import { Server, Socket } from 'socket.io';
-import { NotificationService } from 'src/notification/notification.service';
-import { Notification } from 'src/notification/entities/notification.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { ServiceType } from 'src/common/enum/service-type.enum';
+import { Status } from 'src/common/enum/status.enum';
+import { Notification } from 'src/notification/entities/notification.entity';
+import { NotificationService } from 'src/notification/notification.service';
+import { SocketService } from './socket.service';
 
-@WebSocketGateway({ cors: { origin: '*', credentials: true } })
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+})
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -33,7 +36,6 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     client.join(`user_${userId}`);
-    console.log(`Client ${userId} connected to channel user_${userId} `);
   }
 
   notifyUserDeletedBooking(userId: string, notification: Notification) {
@@ -42,17 +44,24 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .emit(`deletedBookingNotify`, { ...notification });
   }
 
-  notifyUserAfterPurchase(userId: string, notification: Notification) {
+  notifyUserAfterPurchase(
+    userId: string,
+    notification: Notification,
+    status: Status,
+    service: ServiceType,
+  ) {
     this.server
       .to(`user_${userId}`)
-      .emit(`afterPurchaseNotify`, { ...notification });
+      .emit(`afterPurchaseNotify`, { ...notification, status, service });
+  }
+
+  handlePurchasePlan(userId: string, planId: string) {
+    this.server.to(`user_${userId}`).emit(`purchasedPlan`, planId);
   }
 
   sendNewCart(userId: string, cart: Cart) {
     this.server.to(`user_${userId}`).emit(`sendNewCart`, { ...cart });
   }
 
-  handleDisconnect(client: Socket) {
-    console.log(`client disconnected: `, client.id);
-  }
+  handleDisconnect(client: Socket) {}
 }

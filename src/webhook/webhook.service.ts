@@ -1,18 +1,22 @@
 import {
-  Injectable,
   BadGatewayException,
-  NotFoundException,
   BadRequestException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
-import { CartItemService } from 'src/cart-item/cart-item.service';
-import { CartService } from 'src/cart/cart.service';
-import { ClientOrderService } from 'src/client-order/client-order.service';
-import { InvoiceService } from 'src/invoice/invoice.service';
-import { NotificationService } from 'src/notification/notification.service';
-import { PaymentService } from 'src/payment/payment.service';
-import { ProductService } from 'src/product/product.service';
-import { SocketGateway } from 'src/socket/socket.gateway';
-import { ViandService } from 'src/viand/viand.service';
+import { CartItemService } from '../cart-item/cart-item.service';
+import { CartService } from '../cart/cart.service';
+import { ClientOrderService } from '../client-order/client-order.service';
+import { ServiceType } from '../common/enum/service-type.enum';
+import { Status } from '../common/enum/status.enum';
+import { InvoiceService } from '../invoice/invoice.service';
+import { NotificationService } from '../notification/notification.service';
+import { PaymentService } from '../payment/payment.service';
+import { PlanService } from '../plan/plan.service';
+import { PlanPurchaseService } from '../plan_purchase/plan_purchase.service';
+import { ProductService } from '../product/product.service';
+import { SocketGateway } from '../socket/socket.gateway';
+import { ViandService } from '../viand/viand.service';
 
 @Injectable()
 export class WebhookService {
@@ -26,6 +30,8 @@ export class WebhookService {
     private readonly notificationService: NotificationService,
     private readonly socketGateway: SocketGateway,
     private readonly invoiceService: InvoiceService,
+    private readonly planService: PlanService,
+    private readonly planPurchaseService: PlanPurchaseService,
   ) {}
 
   async handleWebHook(webHookData: any) {
@@ -35,33 +41,63 @@ export class WebhookService {
         const paymentDetails = await this.getPaymentDetails(paymentId);
         const activeCartId = paymentDetails.external_reference;
 
+        const hasPurchase = await this.planService.hasUserPurchasedPlan(
+          paymentDetails.metadata.user_id,
+          paymentDetails.metadata.plan_id,
+        );
+
         const alreadyProcessed = await this.paymentService.isPaymentProcessed(
           paymentDetails.external_reference,
         );
 
-        if (alreadyProcessed) {
-          return;
+        if (hasPurchase) return;
+
+        if (paymentDetails.metadata.service_type === 'products') {
+          if (alreadyProcessed) return;
         }
 
-        /**
-         * Al ser aceptado el pago:
-         * - Vaciar el carrito de compras. ✅
-         * - Enviar notificacion flotante al usuario. ✅
-         * - Restar stock de los productos. ✅
-         * - Inhabilitar el carrito activo. ✅
-         * - Crear un carrito activo nuevo. ✅
-         * - Cambiar el estado de la orden a CONFIRMED. ✅
-         * - Generar la factura. ✅
-         *
-         * Al ser rechazado el pago:
-         * - Enviar notificacion flotante al usuario con el pago rechazado. ✅
-         *
-         * Sea rechazado o aceptado:
-         * - Enviar notificacion al usuario. ✅
-         * - Marcar el pago como rechazado/aceptado para que no se repita la operacion. ✅
-         */
-
         if (paymentDetails.status === 'approved') {
+          // Si es un plan, no se hace nada con el carrito, ya que no se generan ordenes.
+          if (!!paymentDetails.metadata.plan_id) {
+            // 1. Vamos a marcar el plan como pagado.
+            await this.planPurchaseService.processPlanPayment(
+              paymentDetails.metadata.user_id,
+              paymentDetails.metadata.plan_id,
+              Status.APPROVED,
+            );
+
+            //2. Enviamos notificacion al usuario.
+            const plan = await this.planService.getPlanById(
+              paymentDetails.metadata.plan_id,
+            );
+
+            const successfulPlanPaymentNotification =
+              await this.notificationService.createNotification(
+                paymentDetails.metadata.user_id,
+                `Tu pago fue aprobado, ya puedes disfrutar de tu plan "${plan.title}"!`,
+              );
+
+            // Web socket para actualizar el estado del plan en tiempo real.
+            this.socketGateway.handlePurchasePlan(
+              paymentDetails.metadata.user_id,
+              paymentDetails.metadata.plan_id,
+            );
+
+            // Web socket para enviar una notificacion al usuario.
+            this.socketGateway.notifyUserAfterPurchase(
+              paymentDetails.metadata.user_id,
+              successfulPlanPaymentNotification,
+              Status.APPROVED,
+              ServiceType.PLAN_DOWNLOAD,
+            );
+
+            // 3. Creamos un pago en DB para guardar el registro
+            return await this.paymentService.markPaymentAsProcessed({
+              paymentId: paymentDetails.metadata.plan_id,
+              clientOrder: null,
+            });
+          }
+
           const itemsAndQuantity = paymentDetails.additional_info.items.map(
             (item: any) => {
               return {
@@ -131,6 +167,8 @@ export class WebhookService {
           this.socketGateway.notifyUserAfterPurchase(
             cart.user.userId,
             notification,
+            Status.APPROVED,
+            ServiceType.CART,
           );
         } else if (paymentDetails.status === 'rejected') {
           // Creamos una notificacion y la enviamos al usuario en tiempo real.
@@ -145,6 +183,8 @@ export class WebhookService {
           this.socketGateway.notifyUserAfterPurchase(
             cart.user.userId,
             notification,
+            Status.REJECTED,
+            ServiceType.CART,
           );
         } else {
           const cart = await this.cartService.getCartById(activeCartId);
@@ -158,6 +198,8 @@ export class WebhookService {
           this.socketGateway.notifyUserAfterPurchase(
             cart.user.userId,
             notification,
+            Status.PENDING,
+            ServiceType.CART,
           );
         }
       }
@@ -199,4 +241,6 @@ export class WebhookService {
       throw new BadGatewayException('Error getting payment details');
     }
   }
+
+  private;
 }
