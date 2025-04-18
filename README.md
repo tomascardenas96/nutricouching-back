@@ -78,6 +78,7 @@ npm install
 SECRET_KEY
 USER_NAME_MAIL
 USER_PASSWORD_MAIL
+ACCESS_TOKEN_MP
 ```
 
 </br>
@@ -126,7 +127,31 @@ src/
 
 </br>
 
-#### 5) Diagrama de Relacion de Entidades
+### 6) Diagrama de Relacion de Entidades
 
 ![Captura de pantalla 2024-12-03 112152](https://github.com/user-attachments/assets/05d27b37-6813-4636-8996-a56a1f3f39ba)
 
+</br>
+
+### 7) Cuentas de prueba (Mercado Pago)
+
+#### Comprador 1:
+
+```bash
+User: TESTUSER1643151276
+Password: C7X0yRGIyB
+```
+
+#### Comprador 2:
+
+```bash
+User: TESTUSER243306729
+Password: VsQnw9pUC0
+```
+
+#### Vendedor:
+
+```bash
+User: TESTUSER596244609
+Password: eoS3AsMfv8
+```
