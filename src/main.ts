@@ -19,7 +19,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: '*', // Cambia esto por la URL de tu frontend
+    origin: '*', // TODO: Cambiar a la URL del frontend en produccion
     credentials: true,
   });
 

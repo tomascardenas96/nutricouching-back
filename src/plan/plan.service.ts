@@ -11,11 +11,11 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { MercadopagoService } from 'src/mercadopago/mercadopago.service';
 import { PlanPurchase } from 'src/plan_purchase/entities/plan-pucharse.entity';
+import { User } from 'src/user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { Plan } from './entities/plan.entity';
-import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class PlanService {
@@ -26,6 +26,74 @@ export class PlanService {
     private readonly userService: UserService,
     private readonly mercadopagoService: MercadopagoService,
   ) {}
+
+  /**
+   * Obtener todos los planes cuando el usuario no está logueado, (separados por comprados y no comprados).
+   *
+   * @returns - Un objeto con dos arreglos: free / purchase
+   */
+  async getAllPlans() {
+    try {
+      const allPlans = await this.planRepository.find();
+
+      const free = allPlans.filter((plan) => plan.price === 0);
+
+      const premium = allPlans.filter((plan) => plan.price > 0);
+
+      return {
+        freePlans: free,
+        notPurchasedPlans: premium,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Error getting all plans');
+    }
+  }
+
+  /**
+   * Obtener todos los planes.
+   *
+   * @param user - Objeto del usuario activo
+   * @returns - Un array de planes dividido en 3 opciones (Gratis, Comprados, No comprados)
+   */
+  async getAllPlansWhenUserIsLoggedIn(user: User) {
+    try {
+      const allPlans = await this.planRepository.find();
+
+      // Obtener los planes gratuitos
+      const freePlans = allPlans.filter((plan) => plan.price === 0);
+
+      // Obtener los planes comprados por el usuario con la relación 'plan'
+      const purchasedPlans = await this.planPurchaseRepository.find({
+        where: { user: { userId: user.userId }, payment_status: 'approved' },
+        relations: ['plan'], // Asegurar que traemos la relación con 'plan'
+      });
+
+      // Extraer los planes completos de la relación
+      const purchasedPlansList = purchasedPlans.map((p) => p.plan);
+
+      // Extraer solo los IDs de los planes comprados para la consulta
+      const purchasedPlanIds = purchasedPlansList.map((plan) => plan.planId);
+
+      // Extraer solo los IDs de los planes gratis para la consulta
+      const freePlansIds = freePlans.map((fp) => fp.planId);
+
+      const notPurchasedPlans = allPlans.filter((plan) => {
+        return (
+          !purchasedPlanIds.includes(plan.planId) &&
+          !freePlansIds.includes(plan.planId)
+        );
+      });
+
+      return {
+        freePlans, // Planes gratuitos
+        purchasedPlans: purchasedPlansList, // Planes comprados completos
+        notPurchasedPlans, // Planes no comprados completos
+      };
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException('Error getting all plans');
+    }
+  }
 
   async createPlan(
     { title, description, price }: CreatePlanDto,
@@ -94,7 +162,6 @@ export class PlanService {
 
       const plan = await this.getPlanById(planId);
 
-
       if (plan.price === 0) {
         return true;
       }
@@ -140,52 +207,6 @@ export class PlanService {
       return await this.planRepository.findOne({ where: { planId } });
     } catch (error) {
       throw new InternalServerErrorException('Error getting plan');
-    }
-  }
-
-  /**
-   * Obtener todos los planes.
-   *
-   * @param user - Objeto del usuario activo
-   * @returns - Un array de planes dividido en 3 opciones (Gratis, Comprados, No comprados)
-   */
-  async getAllPlans(user: User) {
-    try {
-      const allPlans = await this.planRepository.find();
-
-      // Obtener los planes gratuitos
-      const freePlans = allPlans.filter((plan) => plan.price === 0);
-
-      // Obtener los planes comprados por el usuario con la relación 'plan'
-      const purchasedPlans = await this.planPurchaseRepository.find({
-        where: { user: { userId: user.userId }, payment_status: 'approved' },
-        relations: ['plan'], // Asegurar que traemos la relación con 'plan'
-      });
-
-      // Extraer los planes completos de la relación
-      const purchasedPlansList = purchasedPlans.map((p) => p.plan);
-
-      // Extraer solo los IDs de los planes comprados para la consulta
-      const purchasedPlanIds = purchasedPlansList.map((plan) => plan.planId);
-
-      // Extraer solo los IDs de los planes gratis para la consulta
-      const freePlansIds = freePlans.map((fp) => fp.planId);
-
-      const notPurchasedPlans = allPlans.filter((plan) => {
-        return (
-          !purchasedPlanIds.includes(plan.planId) &&
-          !freePlansIds.includes(plan.planId)
-        );
-      });
-
-      return {
-        freePlans, // Planes gratuitos
-        purchasedPlans: purchasedPlansList, // Planes comprados completos
-        notPurchasedPlans, // Planes no comprados completos
-      };
-    } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException('Error getting all plans');
     }
   }
 }

@@ -23,6 +23,17 @@ import { User } from 'src/user/entity/user.entity';
 export class PlanController {
   constructor(private readonly planService: PlanService) {}
 
+  @Get('all')
+  getAllPlans() {
+    return this.planService.getAllPlans();
+  }
+
+  @Get()
+  @UseGuards(TokenGuard)
+  getAllPlansWhenUserIsLoggedIn(@ActiveUser() user: User) {
+    return this.planService.getAllPlansWhenUserIsLoggedIn(user);
+  }
+
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
@@ -55,12 +66,6 @@ export class PlanController {
   @UseGuards(TokenGuard, PlanAccessGuard)
   downloadPlan(@Param('planId') planId: string, @Res() res: Response) {
     return this.planService.downloadPlan(planId, res);
-  }
-
-  @Get()
-  @UseGuards(TokenGuard)
-  getAllPlans(@ActiveUser() user: User) {
-    return this.planService.getAllPlans(user);
   }
 
   @Post(':planId/purchase')
