@@ -135,23 +135,6 @@ src/
 
 ### 7) Cuentas de prueba (Mercado Pago)
 
-#### Comprador 1:
+Para realizar pruebas, utilizá cuentas de prueba que podés generar desde el [Dashboard de desarrollador de Mercado Pago](https://www.mercadopago.com.ar/developers/panel).
 
-```bash
-User: TESTUSER1643151276
-Password: C7X0yRGIyB
-```
-
-#### Comprador 2:
-
-```bash
-User: TESTUSER243306729
-Password: VsQnw9pUC0
-```
-
-#### Vendedor:
-
-```bash
-User: TESTUSER596244609
-Password: eoS3AsMfv8
-```
+Si necesitás ejemplos, podés revisar la [documentación oficial](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro/additional-content/test-cards) donde se detalla cómo crear usuarios test (compradores y vendedores).
