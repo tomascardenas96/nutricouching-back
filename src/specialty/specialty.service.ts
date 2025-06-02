@@ -1,7 +1,9 @@
 import {
   BadGatewayException,
   BadRequestException,
+  HttpException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
@@ -262,6 +264,42 @@ export class SpecialtyService {
       };
     } catch (error) {
       throw new BadGatewayException('Error deleting specialty');
+    }
+  }
+
+  /**
+   *
+   * @param specialtyId
+   * @param param1
+   * @returns
+   */
+  async modifySpecialty(
+    specialtyId: string,
+    { name, serviceId }: UpdateSpecialtyDto,
+  ) {
+    try {
+      const service = await this.serviceService.findServiceById(serviceId);
+
+      const updatedSpecialty = await this.specialtyRepository.update(
+        specialtyId,
+        { name, service },
+      );
+
+      if (updatedSpecialty.affected === 0) {
+        throw new NotFoundException('Specialty not found');
+      }
+
+      return {
+        specialtyId,
+        name: name ? name : null,
+        service: service,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Error modifying specialty');
     }
   }
 }

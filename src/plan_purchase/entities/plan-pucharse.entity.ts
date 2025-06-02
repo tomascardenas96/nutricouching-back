@@ -23,7 +23,10 @@ export class PlanPurchase {
   @JoinColumn({ name: 'user' })
   user: User;
 
-  @ManyToOne(() => Plan, (plan) => plan.planPurchase, { eager: true })
+  @ManyToOne(() => Plan, (plan) => plan.planPurchase, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'plan' })
   plan: Plan;
 }

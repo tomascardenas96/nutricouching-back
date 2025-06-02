@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   Query,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { SpecialtyService } from './specialty.service';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
@@ -77,12 +77,15 @@ export class SpecialtyController {
     );
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Patch(':specialtyId')
+  modifySpecialty(
+    @Param('specialtyId') specialtyId: string,
     @Body() updateSpecialtyDto: UpdateSpecialtyDto,
   ) {
-    return this.specialtyService.update(+id, updateSpecialtyDto);
+    return this.specialtyService.modifySpecialty(
+      specialtyId,
+      updateSpecialtyDto,
+    );
   }
 
   @Delete(':specialtyId')

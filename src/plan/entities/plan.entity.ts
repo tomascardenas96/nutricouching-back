@@ -30,6 +30,8 @@ export class Plan {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @OneToMany(() => PlanPurchase, (planPurchase) => planPurchase.plan)
+  @OneToMany(() => PlanPurchase, (planPurchase) => planPurchase.plan, {
+    onDelete: 'CASCADE',
+  })
   planPurchase: PlanPurchase[];
 }

@@ -16,6 +16,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { Plan } from './entities/plan.entity';
+import { UpdatePlanDto } from './dto/update-plan.dto';
 
 @Injectable()
 export class PlanService {
@@ -96,13 +97,14 @@ export class PlanService {
   }
 
   async createPlan(
-    { title, description, price }: CreatePlanDto,
+    { title, description, price, shortDescription }: CreatePlanDto,
     file_name: string,
   ) {
     try {
       const newPlan = this.planRepository.create({
         title,
         description,
+        shortDescription,
         price: Number(price),
         file_url: file_name,
       });
@@ -207,6 +209,63 @@ export class PlanService {
       return await this.planRepository.findOne({ where: { planId } });
     } catch (error) {
       throw new InternalServerErrorException('Error getting plan');
+    }
+  }
+
+  /**
+   * Eliminar un plan
+   *
+   * @param planId
+   * @returns ID del plan eliminado y un mensaje de exito.
+   */
+  async deletePlan(planId: string) {
+    try {
+      const deletePlan = await this.planRepository.delete(planId);
+
+      if (deletePlan.affected === 0) {
+        throw new NotFoundException('Plan not found');
+      }
+
+      return {
+        message: 'Plan deleted succesfully',
+        id: planId,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Error deleting plan');
+    }
+  }
+
+  /**
+   * Modificar un plan
+   *
+   * @param planId
+   * @param updatePlanDto
+   * @returns Objeto modificado
+   */
+  async updatePlan(planId: string, updatePlan: UpdatePlanDto) {
+    try {
+      const { price, ...rest } = updatePlan;
+
+      const updatedPlan = await this.planRepository.update(planId, {
+        ...rest,
+        ...(price !== undefined && price !== null && price !== ''
+          ? { price: Number(price) }
+          : {}),
+      });
+
+      if (updatedPlan.affected === 0)
+        throw new NotFoundException('Plan Not Found');
+
+      return updatedPlan;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error updating plan');
     }
   }
 }

@@ -8,6 +8,8 @@ import {
   UseInterceptors,
   Res,
   Param,
+  Delete,
+  Patch,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
@@ -18,6 +20,7 @@ import { PlanAccessGuard } from './guard/planAccessGuard.guard';
 import { Response } from 'express';
 import { ActiveUser } from 'src/common/decorators/Active-user.decorator';
 import { User } from 'src/user/entity/user.entity';
+import { UpdatePlanDto } from './dto/update-plan.dto';
 
 @Controller('plan')
 export class PlanController {
@@ -72,5 +75,20 @@ export class PlanController {
   @UseGuards(TokenGuard)
   purchasePlan(@Param('planId') planId: string, @ActiveUser() user: User) {
     return this.planService.purchasePlan(planId, user);
+  }
+
+  @Delete(':planId')
+  @UseGuards(TokenGuard)
+  deletePlan(@Param('planId') planId: string) {
+    return this.planService.deletePlan(planId);
+  }
+
+  @Patch(':planId')
+  @UseGuards(TokenGuard)
+  updatePlan(
+    @Param('planId') planId: string,
+    @Body() updatePlan: UpdatePlanDto,
+  ) {
+    return this.planService.updatePlan(planId, updatePlan);
   }
 }

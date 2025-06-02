@@ -8,6 +8,8 @@ export class CreatePlanDto {
   description: string;
 
   @IsString()
-  price: string;
+  shortDescription: string;
 
+  @IsString()
+  price: string;
 }
