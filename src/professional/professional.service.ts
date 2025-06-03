@@ -1,10 +1,12 @@
 import {
   BadGatewayException,
   BadRequestException,
+  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ServiceService } from 'src/service/service.service';
 import { Repository } from 'typeorm';
 import { Specialty } from '../specialty/entities/specialty.entity';
 import { SpecialtyService } from '../specialty/specialty.service';
@@ -13,9 +15,6 @@ import { UserService } from '../user/user.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { Professional } from './entities/professional.entity';
-import { AvailabilityService } from 'src/availability/availability.service';
-import { ServiceService } from 'src/service/service.service';
-import { Service } from 'src/service/entities/service.entity';
 
 @Injectable()
 export class ProfessionalService {
@@ -163,25 +162,51 @@ export class ProfessionalService {
     }
   }
 
-  modifyProfessional(
+  async modifyProfessional(
     professionalId: string,
     updatedProfessional: UpdateProfessionalDto,
     file: Express.Multer.File,
   ) {
     try {
-      // return this.professionalRepository.update(professionalId, {
-      //   ...updatedProfessional,
-      //   image: file ? file.filename : undefined,
-      // });
+      const update = await this.professionalRepository.update(professionalId, {
+        ...updatedProfessional,
+        image: file ? file.filename : undefined,
+      });
+
+      if (update.affected === 0) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      return {
+        id: professionalId,
+        message: 'Professional updated succesfully',
+        image: file ? file.filename : null,
+      };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadGatewayException('Error modifying professional by id');
     }
   }
 
-  deleteProfessional(professionalId: string) {
+  async deleteProfessional(professionalId: string) {
     try {
-      return this.professionalRepository.delete(professionalId);
+      const deleteProfessional =
+        this.professionalRepository.delete(professionalId);
+
+      if (!deleteProfessional) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      return {
+        id: professionalId,
+        message: 'Professional deleted succesfully',
+      };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new BadGatewayException('Error deleting professional');
     }
   }

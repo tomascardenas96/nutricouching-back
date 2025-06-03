@@ -51,6 +51,9 @@ export class User {
   @Column({ default: false })
   isEmailConfirmed: boolean;
 
+  @Column({ default: false })
+  isDisabled: boolean;
+
   @OneToMany(() => Booking, (booking) => booking.user)
   booking: Booking;
 

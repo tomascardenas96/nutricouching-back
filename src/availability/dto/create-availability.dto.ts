@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString, IsArray } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsArray,
+} from 'class-validator';
 import { Days } from '../../common/enum/days.enum';
 
 export class CreateAvailabilityDto {

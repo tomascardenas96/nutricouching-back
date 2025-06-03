@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -157,6 +158,14 @@ export class UserService {
       return await this.userRepository.update(userId, updateUserDto);
     } catch (error) {
       throw new BadGatewayException('Error morifying user information');
+    }
+  }
+
+  async disableUser(userId: string) {
+    try {
+      return await this.userRepository.update(userId, { isDisabled: true });
+    } catch (error) {
+      throw new InternalServerErrorException('Error disabling user');
     }
   }
 
