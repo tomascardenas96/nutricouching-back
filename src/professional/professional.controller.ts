@@ -8,18 +8,17 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseInterceptors,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { AssignSpecialtyDto } from './dto/assign-specialty.dto';
-import { CreateProfessionalDto } from './dto/create-professional.dto';
-import { ProfessionalService } from './professional.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import * as fs from 'fs';
+import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { TokenGuard } from 'src/auth/guard/token.guard';
+import { CreateProfessionalDto } from './dto/create-professional.dto';
+import { UpdateProfessionalDto } from './dto/update-professional.dto';
+import { ProfessionalService } from './professional.service';
 
 @Controller('professional')
 export class ProfessionalController {
@@ -58,6 +57,11 @@ export class ProfessionalController {
   @Get()
   findAll() {
     return this.professionalService.findAll();
+  }
+
+  @Get(':slug')
+  findProfessionalBySlug(@Param('slug') slug: string) {
+    return this.professionalService.findProfessionalByProfileName(slug);
   }
 
   @Get('specialty')

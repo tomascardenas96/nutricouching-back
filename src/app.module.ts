@@ -26,6 +26,7 @@ import { WebhookModule } from './webhook/webhook.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { PlanModule } from './plan/plan.module';
 import { PlanPurchaseModule } from './plan_purchase/plan_purchase.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { PlanPurchaseModule } from './plan_purchase/plan_purchase.module';
     InvoiceModule,
     PlanModule,
     PlanPurchaseModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

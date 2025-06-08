@@ -3,10 +3,10 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ServiceService } from 'src/service/service.service';
 import { Repository } from 'typeorm';
 import { Specialty } from '../specialty/entities/specialty.entity';
 import { SpecialtyService } from '../specialty/specialty.service';
@@ -25,7 +25,6 @@ export class ProfessionalService {
     private readonly specialtyRepository: Repository<Specialty>,
     private readonly userService: UserService,
     private readonly specialtyService: SpecialtyService,
-    private readonly serviceService: ServiceService,
   ) {}
 
   async create(
@@ -55,6 +54,9 @@ export class ProfessionalService {
         email: user.email,
         image: file ? file.filename : undefined,
         specialty: specialtiesArray,
+        profile: {
+          profileName: `${user.name.toLowerCase()}${user.lastname.toLowerCase()}${crypto.randomUUID().substring(0, 5)}`,
+        },
       });
 
       // Guardar primero el Professional en la base de datos
@@ -108,7 +110,30 @@ export class ProfessionalService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new BadGatewayException('Error trying to find professional by id');
+      throw new InternalServerErrorException(
+        'Error trying to find professional by id',
+      );
+    }
+  }
+
+  async findProfessionalByProfileName(slug: string): Promise<Professional> {
+    try {
+      const professional = await this.professionalRepository.findOne({
+        where: { profile: { profileName: slug } },
+      });
+
+      if (!professional) {
+        throw new NotFoundException('Professional not found');
+      }
+
+      return professional;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error trying to find professional by slug',
+      );
     }
   }
 
