@@ -34,15 +34,4 @@ export class Service {
 
   @Column({ type: 'enum', enum: ServiceType })
   type: ServiceType;
-
-  @OneToMany(() => Booking, (booking) => booking.service)
-  booking: Booking;
-
-  @OneToMany(() => CartItem, (cartItem) => cartItem.service)
-  cartItem: CartItem[];
-
-  @OneToMany(() => Specialty, (specialty) => specialty.service, {
-    onDelete: 'CASCADE',
-  })
-  specialty: Specialty[];
 }

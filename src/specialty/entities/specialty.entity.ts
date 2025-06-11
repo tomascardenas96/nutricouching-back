@@ -1,5 +1,5 @@
+import { Category } from 'src/category/entities/category.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
-import { Service } from 'src/service/entities/service.entity';
 import {
   Column,
   Entity,
@@ -21,13 +21,6 @@ export class Specialty {
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @ManyToOne(() => Service, (service) => service.specialty, {
-    eager: true,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'service' })
-  service: Service;
-
   @ManyToMany(() => Professional, (professional) => professional.specialty, {
     onDelete: 'CASCADE',
   })
@@ -43,4 +36,10 @@ export class Specialty {
     },
   })
   professional: Professional[];
+
+  @ManyToOne(() => Category, (category) => category.specialties, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'category' })
+  category: Category;
 }

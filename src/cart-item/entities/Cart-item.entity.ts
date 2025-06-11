@@ -25,10 +25,6 @@ export class CartItem {
   @Column({ default: 1 })
   quantity: number;
 
-  @ManyToOne(() => Service, (service) => service.cartItem)
-  @JoinColumn({ name: 'service' })
-  service?: Service;
-
   @ManyToOne(() => Viand, (viand) => viand.cartItem, {
     onDelete: 'CASCADE',
     eager: true,

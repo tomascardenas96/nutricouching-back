@@ -27,6 +27,8 @@ import { InvoiceModule } from './invoice/invoice.module';
 import { PlanModule } from './plan/plan.module';
 import { PlanPurchaseModule } from './plan_purchase/plan_purchase.module';
 import { ProfileModule } from './profile/profile.module';
+import { CategoryModule } from './category/category.module';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { ProfileModule } from './profile/profile.module';
     PlanModule,
     PlanPurchaseModule,
     ProfileModule,
+    CategoryModule,
+    PostModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -59,9 +59,17 @@ export class ProfessionalController {
     return this.professionalService.findAll();
   }
 
-  @Get(':slug')
-  findProfessionalBySlug(@Param('slug') slug: string) {
-    return this.professionalService.findProfessionalByProfileName(slug);
+  @Get('filter')
+  filterProfessionals(
+    @Query('name') name: string,
+    @Query('specialty') specialty: string,
+    @Query('category') category: string,
+  ) {
+    return this.professionalService.filterProfessionals(
+      name,
+      specialty,
+      category,
+    );
   }
 
   @Get('specialty')
@@ -111,8 +119,8 @@ export class ProfessionalController {
     return this.professionalService.deleteProfessional(professionalId);
   }
 
-  @Get('service/:serviceId')
-  findProfessionalsByService(@Param('serviceId') serviceId: string) {
-    return this.professionalService.findProfessionalsByService(serviceId);
+  @Get(':slug')
+  findProfessionalBySlug(@Param('slug') slug: string) {
+    return this.professionalService.findProfessionalByProfileName(slug);
   }
 }

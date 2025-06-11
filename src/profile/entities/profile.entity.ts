@@ -1,8 +1,10 @@
+import { Post } from 'src/post/entities/post.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
 import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -29,4 +31,7 @@ export class Profile {
   })
   @JoinColumn({ name: 'professional' })
   professional: Professional;
+
+  @OneToMany(() => Post, (post) => post.profile)
+  posts: Post[];
 }

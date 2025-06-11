@@ -34,11 +34,6 @@ export class SpecialtyController {
     return this.specialtyService.findByQuery(name);
   }
 
-  @Get('service/:serviceId')
-  getSpecialtiesByService(@Param('serviceId') serviceId: string) {
-    return this.specialtyService.getSpecialtiesByService(serviceId);
-  }
-
   @Get('professional/:professionalId')
   getSpecialtiesByProfessional(
     @Param('professionalId') professionalId: string,

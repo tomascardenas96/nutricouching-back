@@ -6,14 +6,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CategoryService } from 'src/category/category.service';
+import { Professional } from 'src/professional/entities/professional.entity';
+import { ILike, Repository } from 'typeorm';
 import { CreateSpecialtyDto } from './dto/create-specialty.dto';
 import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Specialty } from './entities/specialty.entity';
-import { ILike, Repository } from 'typeorm';
-import { ServiceService } from 'src/service/service.service';
-import { Service } from 'src/service/entities/service.entity';
-import { Professional } from 'src/professional/entities/professional.entity';
 
 @Injectable()
 export class SpecialtyService {
@@ -22,7 +21,7 @@ export class SpecialtyService {
     private readonly specialtyRepository: Repository<Specialty>,
     @InjectRepository(Professional)
     private readonly professionalRepository: Repository<Professional>,
-    private readonly serviceService: ServiceService,
+    private readonly categoryService: CategoryService,
   ) {}
 
   /**
@@ -33,7 +32,7 @@ export class SpecialtyService {
    */
   async createSpecialty({
     name,
-    serviceId,
+    categoryId,
   }: CreateSpecialtyDto): Promise<Specialty> {
     try {
       const allSpecialties: Specialty[] = await this.findAll();
@@ -45,11 +44,11 @@ export class SpecialtyService {
         throw new BadRequestException('Specialty already exists');
       }
 
-      const service: Service =
-        await this.serviceService.findServiceById(serviceId);
+      const category = await this.categoryService.findOne(categoryId);
+
       const specialty: Specialty = this.specialtyRepository.create({
         name,
-        service,
+        category,
       });
 
       return this.specialtyRepository.save(specialty);
@@ -106,15 +105,6 @@ export class SpecialtyService {
       return specialtiesList;
     } catch (error) {
       throw new BadGatewayException('Error getting specialty by id');
-    }
-  }
-
-  async getSpecialtiesByService(serviceId: string): Promise<Specialty[]> {
-    try {
-      const service = await this.serviceService.findServiceById(serviceId);
-      return await this.specialtyRepository.find({ where: { service } });
-    } catch (error) {
-      throw new BadGatewayException('Error getting specialtiesByServiceId');
     }
   }
 
@@ -273,16 +263,11 @@ export class SpecialtyService {
    * @param param1
    * @returns
    */
-  async modifySpecialty(
-    specialtyId: string,
-    { name, serviceId }: UpdateSpecialtyDto,
-  ) {
+  async modifySpecialty(specialtyId: string, { name }: UpdateSpecialtyDto) {
     try {
-      const service = await this.serviceService.findServiceById(serviceId);
-
       const updatedSpecialty = await this.specialtyRepository.update(
         specialtyId,
-        { name, service },
+        { name },
       );
 
       if (updatedSpecialty.affected === 0) {
@@ -292,7 +277,6 @@ export class SpecialtyService {
       return {
         specialtyId,
         name: name ? name : null,
-        service: service,
       };
     } catch (error) {
       if (error instanceof HttpException) {

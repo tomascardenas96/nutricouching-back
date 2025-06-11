@@ -5,24 +5,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotificationService } from 'src/notification/notification.service';
 import { Professional } from 'src/professional/entities/professional.entity';
 import { ProfessionalService } from 'src/professional/professional.service';
-import { ServiceService } from 'src/service/service.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 import { UserService } from 'src/user/user.service';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
-import { Availability } from 'src/availability/entities/availability.entity';
-import { User } from 'src/user/entity/user.entity';
-import { NotificationService } from 'src/notification/notification.service';
-import { SocketGateway } from 'src/socket/socket.gateway';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
-    private readonly serviceService: ServiceService,
     private readonly userService: UserService,
     private readonly professionalService: ProfessionalService,
     private readonly notificationService: NotificationService,
@@ -56,10 +52,6 @@ export class BookingService {
       booking.startTime = createBookingDto.startTime;
       booking.endTime = createBookingDto.endTime;
       booking.interval = createBookingDto.interval;
-      booking.service = await this.serviceService.findServiceById(
-        createBookingDto.serviceId,
-      );
-
       booking.user = await this.userService.findUserById(
         createBookingDto.userId,
       );

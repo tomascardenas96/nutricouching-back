@@ -1,13 +1,11 @@
 import { Professional } from 'src/professional/entities/professional.entity';
-import { Service } from 'src/service/entities/service.entity';
 import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn
 } from 'typeorm';
 
 @Entity()
@@ -29,10 +27,6 @@ export class Booking {
 
   @Column()
   specialtyId: string;
-
-  @ManyToOne(() => Service, (service) => service.booking, { eager: true })
-  @JoinColumn({ name: 'service' })
-  service: Service;
 
   @ManyToOne(() => User, (user) => user.booking, { eager: true })
   @JoinColumn({ name: 'user' })

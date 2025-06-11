@@ -137,34 +137,6 @@ export class ProfessionalService {
     }
   }
 
-  async findProfessionalsByService(serviceId: string): Promise<Professional[]> {
-    try {
-      const specialties: Specialty[] =
-        await this.specialtyService.getSpecialtiesByService(serviceId);
-
-      const professionalsByService: Professional[] = [];
-
-      for (const specialty of specialties) {
-        const foundProfessionals: Professional[] =
-          await this.findProfessionalsBySpecialty(specialty.specialtyId);
-
-        foundProfessionals.forEach((spe) => {
-          professionalsByService.push(spe);
-        });
-      }
-
-      return professionalsByService;
-    } catch (error) {
-      if (
-        error instanceof NotFoundException ||
-        error instanceof BadGatewayException
-      ) {
-        throw error;
-      }
-      throw new BadGatewayException('Error getting professionals by service');
-    }
-  }
-
   async findProfessionalsBySpecialty(
     specialtyId: string,
   ): Promise<Professional[]> {
@@ -184,6 +156,47 @@ export class ProfessionalService {
         throw error;
       }
       throw new BadGatewayException('Error getting professionals by service');
+    }
+  }
+
+  /**
+   * Filtrar lista de profesionales por query (nombre, especialidad o categoria)
+   *
+   * @query name
+   * @query specialty
+   * @query category
+   * @returns Arreglo de profesionales
+   */
+  async filterProfessionals(name: string, specialty: string, category: string) {
+    try {
+      const query = this.professionalRepository
+        .createQueryBuilder('professional')
+        .leftJoinAndSelect('professional.specialty', 'specialty')
+        .leftJoinAndSelect('specialty.category', 'category');
+
+      if (name) {
+        query.andWhere('LOWER(professional.fullname) LIKE :name', {
+          name: `%${name.toLowerCase()}%`,
+        });
+      }
+
+      if (specialty) {
+        query.andWhere('LOWER(specialty.name) LIKE :specialty', {
+          specialty: `%${specialty.toLowerCase()}%`,
+        });
+      }
+
+      if (category) {
+        query.andWhere('LOWER(category.name) LIKE :category', {
+          category: `%${category.toLowerCase()}%`,
+        });
+      }
+
+      return await query.getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error filtering professionals by query',
+      );
     }
   }
 
