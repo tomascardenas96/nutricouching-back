@@ -61,11 +61,13 @@ export class ProfessionalController {
 
   @Get('filter')
   filterProfessionals(
+    @Query('every') every: string,
     @Query('name') name: string,
     @Query('specialty') specialty: string,
     @Query('category') category: string,
   ) {
     return this.professionalService.filterProfessionals(
+      every,
       name,
       specialty,
       category,
@@ -120,7 +122,7 @@ export class ProfessionalController {
   }
 
   @Get(':slug')
-  findProfessionalBySlug(@Param('slug') slug: string) {
+  findProfessionalByProfileName(@Param('slug') slug: string) {
     return this.professionalService.findProfessionalByProfileName(slug);
   }
 }

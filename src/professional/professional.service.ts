@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { Specialty } from '../specialty/entities/specialty.entity';
 import { SpecialtyService } from '../specialty/specialty.service';
 import { User } from '../user/entity/user.entity';
@@ -161,18 +161,44 @@ export class ProfessionalService {
 
   /**
    * Filtrar lista de profesionales por query (nombre, especialidad o categoria)
+   * AND & OR
    *
    * @query name
    * @query specialty
    * @query category
    * @returns Arreglo de profesionales
    */
-  async filterProfessionals(name: string, specialty: string, category: string) {
+  async filterProfessionals(
+    every: string,
+    name: string,
+    specialty: string,
+    category: string,
+  ) {
     try {
       const query = this.professionalRepository
         .createQueryBuilder('professional')
         .leftJoinAndSelect('professional.specialty', 'specialty')
-        .leftJoinAndSelect('specialty.category', 'category');
+        .leftJoinAndSelect('specialty.category', 'category')
+        .leftJoinAndSelect('professional.profile', 'profile');
+
+      if (every) {
+        query;
+        query.where(
+          new Brackets((qb) => {
+            qb.where('LOWER(professional.fullname) LIKE :every', {
+              every: `%${every.toLowerCase()}%`,
+            })
+              .orWhere('LOWER(specialty.name) LIKE :every', {
+                every: `%${every.toLowerCase()}%`,
+              })
+              .orWhere('LOWER(category.name) LIKE :every', {
+                every: `%${every.toLowerCase()}%`,
+              });
+          }),
+        );
+
+        return query.getMany();
+      }
 
       if (name) {
         query.andWhere('LOWER(professional.fullname) LIKE :name', {
