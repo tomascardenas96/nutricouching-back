@@ -53,7 +53,11 @@ export class CategoryService {
   }
 
   findAll() {
-    return `This action returns all category`;
+    try {
+      return this.categoryRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Error getting all categories');
+    }
   }
 
   async findOne(categoryId: string) {

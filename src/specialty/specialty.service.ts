@@ -263,11 +263,15 @@ export class SpecialtyService {
    * @param param1
    * @returns
    */
-  async modifySpecialty(specialtyId: string, { name }: UpdateSpecialtyDto) {
+  async modifySpecialty(
+    specialtyId: string,
+    { name, categoryId }: UpdateSpecialtyDto,
+  ) {
     try {
+      const category = await this.categoryService.findOne(categoryId);
       const updatedSpecialty = await this.specialtyRepository.update(
         specialtyId,
-        { name },
+        { name, category },
       );
 
       if (updatedSpecialty.affected === 0) {
@@ -277,6 +281,7 @@ export class SpecialtyService {
       return {
         specialtyId,
         name: name ? name : null,
+        category: category ? category : null,
       };
     } catch (error) {
       if (error instanceof HttpException) {

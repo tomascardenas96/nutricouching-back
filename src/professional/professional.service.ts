@@ -182,7 +182,6 @@ export class ProfessionalService {
         .leftJoinAndSelect('professional.profile', 'profile');
 
       if (every) {
-        query;
         query.where(
           new Brackets((qb) => {
             qb.where('LOWER(professional.fullname) LIKE :every', {
