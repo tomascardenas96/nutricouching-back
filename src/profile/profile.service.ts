@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from './entities/profile.entity';
@@ -15,8 +20,23 @@ export class ProfileService {
     return `This action returns all profile`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} profile`;
+  async findOne(profileId: string) {
+    try {
+      const profile = await this.profileRepository.findOne({
+        where: { profileId },
+      });
+
+      if (!profile) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      return profile;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error getting profile by id');
+    }
   }
 
   update(id: number, updateProfileDto: UpdateProfileDto) {
