@@ -13,7 +13,7 @@ export class Post {
   @PrimaryGeneratedColumn('uuid')
   postId: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'mediumtext' })
   body: string;
 
   @CreateDateColumn()
