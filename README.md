@@ -138,3 +138,11 @@ src/
 Para realizar pruebas, utilizá cuentas de prueba que podés generar desde el [Dashboard de desarrollador de Mercado Pago](https://www.mercadopago.com.ar/developers/panel).
 
 Si necesitás ejemplos, podés revisar la [documentación oficial](https://www.mercadopago.com.ar/developers/es/docs/checkout-pro/additional-content/test-cards) donde se detalla cómo crear usuarios test (compradores y vendedores).
+
+comprador:
+TESTUSER1643151276
+C7X0yRGIyB
+
+vendedor:
+TESTUSER596244609
+eoS3AsMfv8
