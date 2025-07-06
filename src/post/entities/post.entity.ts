@@ -19,6 +19,9 @@ export class Post {
   @CreateDateColumn()
   createdAt: Date;
 
+  @Column({ nullable: true })
+  image: string;
+
   @ManyToOne(() => Profile, (profile) => profile.posts)
   @JoinColumn({ name: 'profile' })
   profile: Profile;
