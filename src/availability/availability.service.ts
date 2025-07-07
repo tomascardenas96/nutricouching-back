@@ -20,7 +20,7 @@ export class AvailabilityService {
     private readonly availabilityRepository: Repository<Availability>,
     private readonly bookingService: BookingService,
     private readonly professionalService: ProfessionalService,
-  ) {}
+  ) { }
 
   /**
    * Crea un horario de disponibilidad para un profesional basado en un array de días y horarios.
@@ -86,7 +86,7 @@ export class AvailabilityService {
                 availability.startTime === start &&
                 availability.day === day &&
                 availability.professional.professionalId ===
-                  professional.professionalId,
+                professional.professionalId,
             );
 
             if (!exists) {
@@ -186,7 +186,7 @@ export class AvailabilityService {
           const slotTime = DateTime.fromISO(slot.startTime).toFormat('HH:mm');
           return (
             DateTime.fromISO(slot.date).toISODate() ===
-              DateTime.fromISO(date).toISODate() &&
+            DateTime.fromISO(date).toISODate() &&
             slotTime === availabilityTime
           );
         });

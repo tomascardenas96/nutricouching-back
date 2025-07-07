@@ -23,13 +23,5 @@ export class CreateBookingDto {
 
   @IsNotEmpty()
   @IsString()
-  serviceId: string;
-
-  @IsNotEmpty()
-  @IsString()
-  userId: string;
-
-  @IsNotEmpty()
-  @IsString()
   professionalId: string;
 }

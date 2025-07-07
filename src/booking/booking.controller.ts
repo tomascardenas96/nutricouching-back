@@ -11,16 +11,18 @@ import {
 import { TokenGuard } from 'src/auth/guard/token.guard';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { ActiveUser } from 'src/common/decorators/Active-user.decorator';
+import { ActiveUserInterface } from 'src/common/interface/Active-user.interface';
 
 @Controller('booking')
 @UseGuards(TokenGuard)
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(private readonly bookingService: BookingService) { }
 
   @UseGuards(TokenGuard)
   @Post('create')
-  create(@Body() createBookingDto: CreateBookingDto) {
-    return this.bookingService.create(createBookingDto);
+  create(@Body() createBookingDto: CreateBookingDto, @ActiveUser() activeUser: ActiveUserInterface) {
+    return this.bookingService.create(createBookingDto, activeUser);
   }
 
   @Get('professional')

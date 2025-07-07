@@ -13,6 +13,7 @@ import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { Booking } from './entities/booking.entity';
+import { ActiveUserInterface } from 'src/common/interface/Active-user.interface';
 
 @Injectable()
 export class BookingService {
@@ -23,9 +24,9 @@ export class BookingService {
     private readonly professionalService: ProfessionalService,
     private readonly notificationService: NotificationService,
     private readonly socketGateway: SocketGateway,
-  ) {}
+  ) { }
 
-  async create(createBookingDto: CreateBookingDto): Promise<Booking> {
+  async create(createBookingDto: CreateBookingDto, activeUser: ActiveUserInterface): Promise<{ message: string }> {
     try {
       const professional = await this.professionalService.findProfessionalById(
         createBookingDto.professionalId,
@@ -53,14 +54,16 @@ export class BookingService {
       booking.endTime = createBookingDto.endTime;
       booking.interval = createBookingDto.interval;
       booking.user = await this.userService.findUserById(
-        createBookingDto.userId,
+        activeUser.userId
       );
 
       booking.professional = professional;
 
       booking.specialtyId = createBookingDto.specialtyId;
 
-      return this.bookingRepository.save(booking);
+      await this.bookingRepository.save(booking);
+
+      return { message: 'Shift booked successfully' }
     } catch (error) {
       if (
         error instanceof BadGatewayException ||
