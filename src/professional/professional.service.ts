@@ -25,7 +25,7 @@ export class ProfessionalService {
     private readonly specialtyRepository: Repository<Specialty>,
     private readonly userService: UserService,
     private readonly specialtyService: SpecialtyService,
-  ) {}
+  ) { }
 
   async create(
     { userId, specialties }: CreateProfessionalDto,

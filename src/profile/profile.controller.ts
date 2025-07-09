@@ -1,18 +1,27 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
-import { ProfileService } from './profile.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { ActiveUser } from 'src/common/decorators/Active-user.decorator';
+import { ActiveUserInterface } from 'src/common/interface/Active-user.interface';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ProfileService } from './profile.service';
+import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('profile')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(private readonly profileService: ProfileService) { }
 
   @Get()
   findAll() {
@@ -24,13 +33,62 @@ export class ProfileController {
     return this.profileService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
-    return this.profileService.update(+id, updateProfileDto);
+  @UseGuards(TokenGuard)
+  @Patch('photo/:id')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = './uploads/professionals/profile';
+
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+        },
+      }),
+    }),
+  )
+  updateProfilePicture(@UploadedFile() file: Express.Multer.File, @Param('id') profileId: string) {
+    return this.profileService.updateProfilePicture(file, profileId)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.profileService.remove(+id);
+  @UseGuards(TokenGuard)
+  @Patch('cover/:id')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = './uploads/professionals/cover';
+
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+        },
+      }),
+    }),
+  )
+  updateProfileCover(@UploadedFile() file: Express.Multer.File, @Param('id') profileId: string) {
+    return this.profileService.updateProfileCover(file, profileId)
+  }
+
+  @Get('name/:profilename')
+  findOneByProfileName(@Param('profilename') profilename: string) {
+    return this.profileService.findOneByProfileName(profilename)
   }
 }

@@ -9,7 +9,7 @@ import {
   Query,
   UploadedFile,
   UseGuards,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import * as fs from 'fs';
@@ -22,7 +22,7 @@ import { ProfessionalService } from './professional.service';
 
 @Controller('professional')
 export class ProfessionalController {
-  constructor(private readonly professionalService: ProfessionalService) {}
+  constructor(private readonly professionalService: ProfessionalService) { }
 
   @Post('create')
   @UseGuards(TokenGuard)
@@ -121,8 +121,10 @@ export class ProfessionalController {
     return this.professionalService.deleteProfessional(professionalId);
   }
 
-  @Get(':slug')
+  @Get('profilename/:slug')
   findProfessionalByProfileName(@Param('slug') slug: string) {
     return this.professionalService.findProfessionalByProfileName(slug);
   }
+
+
 }

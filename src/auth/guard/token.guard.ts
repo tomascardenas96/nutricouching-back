@@ -42,7 +42,6 @@ export class TokenGuard implements CanActivate {
       return true;
 
     } catch (error) {
-      console.log(error)
       if (error instanceof HttpException) {
         throw error;
       }
