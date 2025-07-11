@@ -17,14 +17,32 @@ export class Profile {
   @Column({ unique: true })
   profileName: string;
 
-  @Column({ default: null })
+  @Column({ nullable: true })
   picture: string;
 
-  @Column({ default: null })
+  @Column({ nullable: true })
   coverPhoto: string;
 
-  @Column({ default: null })
+  @Column({ nullable: true })
   bio: string;
+
+  @Column({ nullable: true })
+  location: string;
+
+  @Column({ nullable: true })
+  phone: string;
+
+  @Column({ nullable: true })
+  instagram: string;
+
+  @Column({ nullable: true })
+  facebook: string;
+
+  @Column({ nullable: true })
+  x: string;
+
+  @Column({ nullable: true })
+  tiktok: string;
 
   @OneToOne(() => Professional, (professional) => professional, {
     onDelete: 'CASCADE',

@@ -91,4 +91,10 @@ export class ProfileController {
   findOneByProfileName(@Param('profilename') profilename: string) {
     return this.profileService.findOneByProfileName(profilename)
   }
+
+  @UseGuards(TokenGuard)
+  @Patch('update')
+  updateProfileInfo(@Body() updateProfileDto: UpdateProfileDto, @ActiveUser() activeUser: ActiveUserInterface) {
+    return this.profileService.updateProfileInfo(updateProfileDto, activeUser)
+  }
 }

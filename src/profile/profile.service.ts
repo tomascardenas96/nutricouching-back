@@ -10,12 +10,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from './entities/profile.entity';
 import { Repository } from 'typeorm';
 import { ActiveUserInterface } from 'src/common/interface/Active-user.interface';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class ProfileService {
   constructor(
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
+    private readonly userService: UserService
   ) { }
 
   findAll() {
@@ -92,6 +94,29 @@ export class ProfileService {
       return profile;
     } catch (error) {
       throw new InternalServerErrorException("Error finding profile by profile name")
+    }
+  }
+
+  async updateProfileInfo(updateProfileDto: UpdateProfileDto, activeUser: ActiveUserInterface) {
+    try {
+      const user = await this.userService.findUserById(activeUser.userId);
+
+      if (!user.professional) {
+        throw new BadRequestException("User must be professional");
+      }
+
+      const profileId = user.professional.profile.profileId;
+
+      await this.profileRepository.update(profileId, { ...updateProfileDto });
+
+      const updatedProfile = await this.findOne(profileId)
+
+      return updatedProfile;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException("Error updating profile information")
     }
   }
 }
