@@ -15,10 +15,10 @@ import { UpdateSpecialtyDto } from './dto/update-specialty.dto';
 import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('specialty')
-@UseGuards(TokenGuard)
 export class SpecialtyController {
-  constructor(private readonly specialtyService: SpecialtyService) {}
+  constructor(private readonly specialtyService: SpecialtyService) { }
 
+  @UseGuards(TokenGuard)
   @Post()
   createSpecialty(@Body() createSpecialtyDto: CreateSpecialtyDto) {
     return this.specialtyService.createSpecialty(createSpecialtyDto);
@@ -41,6 +41,7 @@ export class SpecialtyController {
     return this.specialtyService.getSpecialtiesByProfessional(professionalId);
   }
 
+  @UseGuards(TokenGuard)
   @Post('/list')
   verifyAndCreateSpecialtiesByArray(
     @Body() createSpecialtyDto: CreateSpecialtyDto[],
@@ -50,6 +51,7 @@ export class SpecialtyController {
     );
   }
 
+  @UseGuards(TokenGuard)
   @Post(':specialtyId/professional/:professionalId')
   assignSpecialtyToAProfessional(
     @Param('specialtyId') specialtyId: string,
@@ -61,6 +63,7 @@ export class SpecialtyController {
     );
   }
 
+  @UseGuards(TokenGuard)
   @Patch('unlink/:specialtyId/professional/:professionalId')
   unassignSpecialtyOfProfessional(
     @Param('specialtyId') specialtyId: string,
@@ -72,6 +75,7 @@ export class SpecialtyController {
     );
   }
 
+  @UseGuards(TokenGuard)
   @Patch(':specialtyId')
   modifySpecialty(
     @Param('specialtyId') specialtyId: string,
@@ -83,6 +87,7 @@ export class SpecialtyController {
     );
   }
 
+  @UseGuards(TokenGuard)
   @Delete(':specialtyId')
   remove(@Param('specialtyId') specialtyId: string) {
     return this.specialtyService.deleteSpecialty(specialtyId);

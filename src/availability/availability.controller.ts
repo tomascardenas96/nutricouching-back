@@ -14,10 +14,10 @@ import { Days } from 'src/common/enum/days.enum';
 import { TokenGuard } from 'src/auth/guard/token.guard';
 
 @Controller('availability')
-@UseGuards(TokenGuard)
 export class AvailabilityController {
-  constructor(private readonly availabilityService: AvailabilityService) {}
+  constructor(private readonly availabilityService: AvailabilityService) { }
 
+  @UseGuards(TokenGuard)
   @Post(':professionalId')
   createProfessionalScheduleByArray(
     @Param('professionalId') professionalId: string,
@@ -45,6 +45,7 @@ export class AvailabilityController {
     return this.availabilityService.getTimeSlotByProfessional(professionalId);
   }
 
+  @UseGuards(TokenGuard)
   @Delete()
   deleteTimeSlot(
     @Query('startTime') startTime: string,
