@@ -22,7 +22,7 @@ export class SpecialtyService {
     @InjectRepository(Professional)
     private readonly professionalRepository: Repository<Professional>,
     private readonly categoryService: CategoryService,
-  ) {}
+  ) { }
 
   /**
    * Metodo para crear una nueva especialidad
@@ -289,6 +289,14 @@ export class SpecialtyService {
       }
 
       throw new InternalServerErrorException('Error modifying specialty');
+    }
+  }
+
+  async getSpecialtiesByCategory(id: string) {
+    try {
+      return await this.specialtyRepository.find({ where: { category: { categoryId: id } } })
+    } catch (error) {
+      throw new InternalServerErrorException("Error getting specialties by category id")
     }
   }
 }

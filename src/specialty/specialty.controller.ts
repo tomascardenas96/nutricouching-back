@@ -41,6 +41,11 @@ export class SpecialtyController {
     return this.specialtyService.getSpecialtiesByProfessional(professionalId);
   }
 
+  @Get('category/:id')
+  getSpecialtiesByCategory(@Param('id') id: string) {
+    return this.specialtyService.getSpecialtiesByCategory(id)
+  }
+
   @UseGuards(TokenGuard)
   @Post('/list')
   verifyAndCreateSpecialtiesByArray(
