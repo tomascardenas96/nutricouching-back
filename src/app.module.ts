@@ -29,20 +29,23 @@ import { PlanPurchaseModule } from './plan_purchase/plan_purchase.module';
 import { ProfileModule } from './profile/profile.module';
 import { CategoryModule } from './category/category.module';
 import { PostModule } from './post/post.module';
+import 'dotenv/config'
+
+console.log(process.env.DATABASE_URL)
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'nutricoaching',
-      entities: [join(__dirname, '/**/*.entity{.js,.ts}')],
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
       synchronize: true,
+      autoLoadEntities: true,
     }),
     ProductModule,
     ViandModule,
@@ -75,4 +78,4 @@ import { PostModule } from './post/post.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

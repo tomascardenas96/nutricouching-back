@@ -2,6 +2,7 @@ import { CartItem } from 'src/cart-item/entities/Cart-item.entity';
 import { Ingredient } from 'src/ingredient/entities/ingredient.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToMany,
   OneToMany,
@@ -28,7 +29,7 @@ export class Viand {
   @Column()
   description: string;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
   @Column({

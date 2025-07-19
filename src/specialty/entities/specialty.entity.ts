@@ -2,6 +2,7 @@ import { Category } from 'src/category/entities/category.entity';
 import { Professional } from 'src/professional/entities/professional.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
@@ -18,7 +19,7 @@ export class Specialty {
   @Column()
   name: string;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
   @ManyToMany(() => Professional, (professional) => professional.specialty, {

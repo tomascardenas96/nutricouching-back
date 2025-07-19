@@ -1,6 +1,7 @@
 import { ClientOrder } from 'src/client-order/entities/client-order.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -16,7 +17,7 @@ export class Payment {
   @Column({ unique: true })
   paymentId: string;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
   @ManyToOne(() => ClientOrder, (clientOrder) => clientOrder.payments, {

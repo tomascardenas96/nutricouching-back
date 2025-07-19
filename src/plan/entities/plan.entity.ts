@@ -1,5 +1,5 @@
 import { PlanPurchase } from 'src/plan_purchase/entities/plan-pucharse.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Plan {
@@ -27,7 +27,7 @@ export class Plan {
   @Column({ nullable: true })
   image: string;
 
-  @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
   @OneToMany(() => PlanPurchase, (planPurchase) => planPurchase.plan, {
